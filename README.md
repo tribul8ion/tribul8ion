@@ -13,11 +13,6 @@ I build practical tools for self-hosting, automation, monitoring, and everyday i
 - Health, productivity, and personal automation
 - Clean interfaces over complicated systems
 
-## 🩸 Featured work
-
-### [frigate-telegram-enhanced](https://github.com/tribul8ion/frigate-telegram-enhanced)
-
-Enhanced Telegram notifications for Frigate NVR with snapshots, clips, filters, camera controls, a web interface, persistent state, metrics, and multi-architecture containers.
 
 ## 🕯️ Working principles
 
