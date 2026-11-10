@@ -428,14 +428,14 @@ def render(data):
 # The version is the Git blob SHA-1 prefix; it changes only if SVG bytes change.
 # All eight refs must be present, so a broken README integration fails loudly.
 _WIDGET_REF = re.compile(
-    r'(\\./assets/widgets/(?:mobile/)?(?:signal|heatmap|languages|activity)\\.svg)'
-    r'(?:\\?v=[a-f0-9]{12})?'
+    r'(\./assets/widgets/(?:mobile/)?(?:signal|heatmap|languages|activity)\.svg)'
+    r'(?:\?v=[a-f0-9]{12})?'
 )
 
 
 def widget_revision(svg):
     raw = svg.encode('utf-8')
-    header = b'blob ' + str(len(raw)).encode('ascii') + b'\\x00'
+    header = b'blob ' + str(len(raw)).encode('ascii') + b'\x00'
     return hashlib.sha1(header + raw).hexdigest()[:12]
 
 
