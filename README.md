@@ -1,35 +1,61 @@
-# ⛧ tribul8ion
+<div align="center">
 
-**Software, systems, and controlled chaos.**
+<img src="https://raw.githubusercontent.com/tribul8ion/obrigan.github.io/main/src/img/banners/1.gif" width="100%" alt="animated dark background" />
 
-I build practical tools for self-hosting, automation, monitoring, and everyday infrastructure.
+# ⛧ tribul8ion ⛧
 
-## ⚙️ Current interests
+### `software // systems // controlled chaos`
 
-- Self-hosted systems and homelab tooling
-- Computer vision and camera automation
-- Telegram integrations and event-driven services
-- Developer tools for remote execution and operations
-- Health, productivity, and personal automation
-- Clean interfaces over complicated systems
+<sub>Building tools for machines that should have stayed off.</sub>
 
+</div>
 
-## 🕯️ Working principles
+---
 
-- Make useful things.
-- Keep systems observable.
-- Prefer boring reliability over magical complexity.
-- Automate repetitive work.
-- Leave the codebase better than it was found.
+## 🩸 ABOUT
 
-## 🛠️ Tools of the trade
+I build practical software for self-hosting, automation, monitoring, and everyday infrastructure.
 
-`Python · Go · Dart · Flutter · JavaScript · Docker · Linux`
+Most of the serious work happens in private repositories. The public surface is intentionally small: a few projects, maintained with care.
 
-`SQLite · MQTT · REST · GitHub Actions · Home automation`
+## ⚰️ SELECTED WORK
 
-## ☠️ Status
+| Project | What it is |
+| --- | --- |
+| [frigate-telegram-enhanced](https://github.com/tribul8ion/frigate-telegram-enhanced) | Frigate NVR notifications, clips, filters, camera controls, web configuration, metrics, and containers. |
+| [tribul8ion.github.io](https://github.com/tribul8ion/tribul8ion.github.io) | A dark, customisable browser startpage. |
 
-Building quietly. Shipping when it matters.
+## ⚙️ CURRENTLY OBSESSED WITH
 
 ```text
+self-hosting       computer vision       camera automation
+event-driven apps  remote operations     observability
+health tooling      developer utilities   clean interfaces
+```
+
+## 🛠️ ARSENAL
+
+`Python` · `Go` · `Dart` · `Flutter` · `JavaScript` · `Docker` · `Linux`
+
+`SQLite` · `MQTT` · `REST` · `GitHub Actions` · `Home Automation`
+
+## 🕯️ PRINCIPLES
+
+- Useful beats impressive.
+- Observable beats magical.
+- Boring reliability beats clever fragility.
+- Automate the repetitive parts.
+- Leave the system less cursed than you found it.
+
+## ☠️ STATUS
+
+```text
+BUILDING QUIETLY.
+SHIPPING WHEN IT MATTERS.
+```
+
+<div align="center">
+
+`[ SYSTEM ONLINE ]`  `//`  `NO SIGNAL`  `//`  `[ KEEP BUILDING ]`
+
+</div>
