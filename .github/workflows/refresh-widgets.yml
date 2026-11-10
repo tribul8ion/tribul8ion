@@ -1,6 +1,18 @@
 name: TRBL8 / Public telemetry
 
 on:
+  # Run the first real data sync automatically when profile changes reach main.
+  # Generated telemetry SVG commits use GITHUB_TOKEN and do not retrigger workflows.
+  push:
+    branches: [main]
+    paths:
+      - 'README.md'
+      - 'DESIGN.md'
+      - 'assets/*.svg'
+      - 'assets/mobile/*.svg'
+      - 'scripts/**'
+      - 'tests/**'
+      - '.github/workflows/refresh-widgets.yml'
   pull_request:
     paths:
       - 'README.md'
