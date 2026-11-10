@@ -9,6 +9,7 @@ when API retrieval fails.
 from __future__ import annotations
 
 import argparse
+import hashlib
 from collections import Counter
 from datetime import date, datetime, timedelta, timezone
 from html import escape
@@ -422,6 +423,38 @@ def render(data):
     return cards
 
 
+
+# Content-addressed cache keys for GitHub's proxied README images.
+# The version is the Git blob SHA-1 prefix; it changes only if SVG bytes change.
+# All eight refs must be present, so a broken README integration fails loudly.
+_WIDGET_REF = re.compile(
+    r'(\./assets/widgets/(?:mobile/)?(?:signal|heatmap|languages|activity)\.svg)'
+    r'(?:\?v=[a-f0-9]{12})?'
+)
+
+
+def widget_revision(svg):
+    raw = svg.encode('utf-8')
+    header = b'blob ' + str(len(raw)).encode('ascii') + b'\x00'
+    return hashlib.sha1(header + raw).hexdigest()[:12]
+
+
+def versioned_readme(source, cards):
+    found = set()
+
+    def rewrite(match):
+        path = match.group(1)
+        name = path.removeprefix('./assets/widgets/')
+        found.add(name)
+        return path + '?v=' + widget_revision(cards[name])
+
+    result = _WIDGET_REF.sub(rewrite, source)
+    if found != set(cards):
+        raise ValueError('README widget references do not match rendered SVGs: '
+                         + repr(sorted(set(cards) ^ found)))
+    return result
+
+
 def main():
     parser=argparse.ArgumentParser(description='Render public GitHub profile SVG widgets')
     parser.add_argument('--fixture',type=Path,help='Offline demo data, NEVER for production sync')
@@ -430,13 +463,25 @@ def main():
     arg=parser.parse_args()
     data=json.loads(arg.fixture.read_text('utf-8')) if arg.fixture else live_data(arg.user,os.getenv('GITHUB_TOKEN',''))
     items=render(data)
+    # Only the real production refresh versions the tracked README. Offline
+    # fixture tests and --out previews never change profile metadata.
+    readme_path=ROOT/'README.md'
+    previous_readme=None
+    next_readme=None
+    if not arg.fixture and arg.out.resolve()==OUT.resolve():
+        previous_readme=readme_path.read_text(encoding='utf-8')
+        next_readme=versioned_readme(previous_readme,items)
     arg.out.mkdir(parents=True,exist_ok=True)
     for name,content in items.items():
         temp=arg.out/(name+'.tmp')
         temp.parent.mkdir(parents=True,exist_ok=True)
         temp.write_text(content,encoding='utf-8')
         temp.replace(arg.out/name)
-    print(f'OK: refreshed {len(items)} SVG cards')
+    if next_readme is not None and next_readme!=previous_readme:
+        temp=readme_path.with_name('README.md.tmp')
+        temp.write_text(next_readme,encoding='utf-8')
+        temp.replace(readme_path)
+    print(f'OK: refreshed {len(items)} SVG cards; README cache keys updated if changed')
 
 if __name__=='__main__':
     try:main()
