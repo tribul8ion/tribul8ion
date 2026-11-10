@@ -26,8 +26,8 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 7
     steps:
-      - uses: actions/checkout@v7
-      - uses: actions/setup-python@v7
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
       - name: Unit tests
@@ -57,10 +57,10 @@ jobs:
     permissions:
       contents: write
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@v4
         with:
           persist-credentials: true
-      - uses: actions/setup-python@v7
+      - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
       - name: Read public GitHub data and render static cards
