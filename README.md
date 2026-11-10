@@ -38,16 +38,16 @@
 <!-- 02 / PUBLIC SIGNAL; eight paired SVGs versioned automatically by the renderer. -->
 <p align="center">
   <picture>
-    <source media="(max-width: 800px)" srcset="./assets/widgets/mobile/signal.svg?v=73cd57a3db88" />
-    <img src="./assets/widgets/signal.svg?v=1ca272bf05da" width="100%" alt="Public GitHub statistics: public repositories, merged pull requests, visible contributions in the past year and followers." />
+    <source media="(max-width: 800px)" srcset="./assets/widgets/mobile/signal.svg?v=40957960e27d" />
+    <img src="./assets/widgets/signal.svg?v=7091ebc7cc34" width="100%" alt="Public GitHub statistics: public repositories, merged pull requests, visible contributions in the past year and followers." />
   </picture>
 </p>
 
 <!-- 03 / CONTRIBUTION CALENDAR -->
 <p align="center">
   <picture>
-    <source media="(max-width: 800px)" srcset="./assets/widgets/mobile/heatmap.svg?v=e026dd4cb167" />
-    <img src="./assets/widgets/heatmap.svg?v=35556aa8927e" width="100%" alt="Public contributions during the calendar year, January to December; recent activity is highlighted in warm red." />
+    <source media="(max-width: 800px)" srcset="./assets/widgets/mobile/heatmap.svg?v=bec8af8b837c" />
+    <img src="./assets/widgets/heatmap.svg?v=8e5ecda9551c" width="100%" alt="Public contributions during the calendar year, January to December; recent activity is highlighted in warm red." />
   </picture>
 </p>
 
@@ -62,8 +62,8 @@
 <!-- 05 / PUBLIC ACTIVITY -->
 <p align="center">
   <picture>
-    <source media="(max-width: 800px)" srcset="./assets/widgets/mobile/activity.svg?v=12df34d844c9" />
-    <img src="./assets/widgets/activity.svg?v=0b081b36f8f2" width="100%" alt="A small feed of recent public GitHub events and contributions." />
+    <source media="(max-width: 800px)" srcset="./assets/widgets/mobile/activity.svg?v=a38ac24e9cd4" />
+    <img src="./assets/widgets/activity.svg?v=8e74bcfcd754" width="100%" alt="A small feed of recent public GitHub events and contributions." />
   </picture>
 </p>
 
