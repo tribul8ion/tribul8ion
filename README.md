@@ -27,13 +27,13 @@ Selected **public, verifiable** contributions and projects. Private repositories
 
 Self-rendered graphics using public GitHub data, refreshed by GitHub Actions. **A missing reading is shown as unavailable, never invented.**
 
-<p align="center"><picture><source media="(max-width: 800px)" srcset="./assets/widgets/mobile/signal.svg" /><img src="./assets/widgets/signal.svg" width="100%" alt="Public repositories, merged pull requests, visible contributions and followers" /></picture></p>
+<p align="center"><picture><source media="(max-width: 800px)" srcset="./assets/widgets/mobile/signal.svg?v=4f693a53528c" /><img src="./assets/widgets/signal.svg?v=ed4f84756da2" width="100%" alt="Public repositories, merged pull requests, visible contributions and followers" /></picture></p>
 
-<p align="center"><picture><source media="(max-width: 800px)" srcset="./assets/widgets/mobile/heatmap.svg" /><img src="./assets/widgets/heatmap.svg" width="100%" alt="GitHub contribution heatmap for the rolling year" /></picture></p>
+<p align="center"><picture><source media="(max-width: 800px)" srcset="./assets/widgets/mobile/heatmap.svg?v=181834621d34" /><img src="./assets/widgets/heatmap.svg?v=122058347f54" width="100%" alt="GitHub contribution heatmap for the rolling year" /></picture></p>
 
-<p align="center"><picture><source media="(max-width: 800px)" srcset="./assets/widgets/mobile/languages.svg" /><img src="./assets/widgets/languages.svg" width="100%" alt="Language breakdown based on code bytes in recent public non-fork repositories" /></picture></p>
+<p align="center"><picture><source media="(max-width: 800px)" srcset="./assets/widgets/mobile/languages.svg?v=8d2fdb2be4f2" /><img src="./assets/widgets/languages.svg?v=c3a46146307b" width="100%" alt="Language breakdown based on code bytes in recent public non-fork repositories" /></picture></p>
 
-<p align="center"><picture><source media="(max-width: 800px)" srcset="./assets/widgets/mobile/activity.svg" /><img src="./assets/widgets/activity.svg" width="100%" alt="Recent public GitHub events" /></picture></p>
+<p align="center"><picture><source media="(max-width: 800px)" srcset="./assets/widgets/mobile/activity.svg?v=6a3b7b80dfa5" /><img src="./assets/widgets/activity.svg?v=ff9ed50ae692" width="100%" alt="Recent public GitHub events" /></picture></p>
 
 ### 04 / The toolchain
 

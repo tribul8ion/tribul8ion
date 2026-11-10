@@ -65,6 +65,30 @@ class WidgetTests(unittest.TestCase):
             self.assertNotIn('example/public',src)
             self.assertIn('AWAITING FIRST SYNC',src)
 
+
+    def test_widget_cache_keys_are_content_addressed_and_idempotent(self):
+        source=(ROOT/'README.md').read_text(encoding='utf-8')
+        cards=R.render({})
+        first=R.versioned_readme(source,cards)
+        self.assertEqual(first,R.versioned_readme(first,cards))
+        for name,content in cards.items():
+            key='./assets/widgets/'+name+'?v='+R.widget_revision(content)
+            self.assertIn(key,first)
+        modified=dict(cards)
+        modified['signal.svg']=cards['signal.svg']+'\\n'
+        second=R.versioned_readme(first,modified)
+        self.assertNotEqual(first,second)
+        self.assertEqual(R.versioned_readme(second,modified),second)
+        self.assertIn('./assets/widgets/signal.svg?v='+R.widget_revision(modified['signal.svg']),second)
+        self.assertIn('./assets/widgets/mobile/signal.svg?v='+R.widget_revision(cards['mobile/signal.svg']),second)
+
+    def test_tracked_readme_cache_keys_match_public_widget_files(self):
+        source=(ROOT/'README.md').read_text(encoding='utf-8')
+        for name in R.render({}):
+            svg=(ROOT/'assets/widgets'/name).read_text(encoding='utf-8')
+            expected='./assets/widgets/'+name+'?v='+R.widget_revision(svg)
+            self.assertIn(expected,source)
+
     def test_palette_contrast(self):
         def lum(h):
             rgb=[int(h[i:i+2],16)/255 for i in (1,3,5)]
