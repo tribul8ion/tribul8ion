@@ -1,0 +1,40 @@
+name: TRBL8 // Refresh public telemetry
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '19 5 * * *' # GitHub schedules run in UTC and may be delayed
+
+permissions:
+  contents: write
+
+concurrency:
+  group: trbl8-profile-telemetry
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Rebuild widgets from public GitHub data
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: python scripts/render_widgets.py
+      - name: Commit only changed SVG cards
+        run: |
+          git add assets/widgets/signal.svg assets/widgets/heatmap.svg assets/widgets/languages.svg assets/widgets/activity.svg
+          if git diff --cached --quiet; then
+            echo 'No telemetry changes'
+            exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git commit -m 'chore(profile): refresh public telemetry [skip ci]'
+          git push
