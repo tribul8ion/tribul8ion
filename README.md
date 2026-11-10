@@ -1,42 +1,44 @@
-
-<p align="center">
-  <img src="./assets/hero.svg" width="100%" alt="TRIBUL8ION — Systems. Software. Automation." />
+<!--
+  TRBL8 / BLACK METAL EDITORIAL
+  README assets are local, static SVGs. No trackers, scripts or remote image APIs.
+  Visual DNA: AI Dispatch editorial grid + photocopied underground zine.
+--><p align="center">
+  <img src="./assets/hero-raw.svg" alt="TRIBUL8ION — systems, software, automation" width="100%" />
 </p><p align="center">
-  <strong>I make repetitive work disappear.</strong><br />
-  <sub>Automation · Mobile applications · Infrastructure · Open source</sub>
-</p><p align="center">
-  <a href="https://github.com/tribul8ion?tab=repositories"><img alt="Repositories" src="https://img.shields.io/badge/REPOSITORIES-17131d?style=for-the-badge&logo=github&logoColor=cb92b4" /></a>
-  <a href="https://github.com/Limoniak/frigate-telegram-enhanced/pull/48"><img alt="Open-source contribution" src="https://img.shields.io/badge/OPEN_SOURCE-17131d?style=for-the-badge&logo=git&logoColor=cb92b4" /></a>
-</p>01 — About
-I'm Vlad — a systems administrator who enjoys building software and turning manual workflows into reliable, repeatable tools.
+  <sub>SYSTEMS ADMINISTRATION &nbsp; / &nbsp; AUTOMATION &nbsp; / &nbsp; SOFTWARE &nbsp; / &nbsp; OPEN SOURCE</sub>
+</p><!-- 60/40 split from the generator; useful content in place of brittle API stats. -->
+<table>
+<tr>
+<td width="60%" valign="top"><h3>01 / ABOUT THE OPERATOR</h3><p>Hey, I'm <strong>Vlad</strong> — a systems administrator who builds practical software and automates the repetitive parts of IT.</p><p>I work across <strong>Windows automation</strong>, <strong>Python tooling</strong>, <strong>Flutter applications</strong>, and <strong>self-hosted infrastructure</strong>. I like reliable systems, thoughtful interfaces, and tools that earn their place.</p><pre>work > automate > verify > repeat</pre><p><strong>Current directions</strong></p>
+<ul>
+  <li>PowerShell &amp; Python automation</li>
+  <li>Flutter / Dart applications</li>
+  <li>Linux, Docker &amp; home infrastructure</li>
+  <li>ESP32 dashboards and small hardware builds</li>
+</ul></td>
+<td width="40%" valign="top" align="center">
+<img src="./assets/field-notes.svg" alt="Field notes: automate, develop, self-host, experiment" width="100%" />
+</td>
+</tr>
+</table>02 / TOOLCHAIN
+SYSTEMS & AUTOMATION	DEVELOPMENT	INFRASTRUCTURE & HARDWARE
+PowerShell · Python · Bash	Flutter · Dart · SQLite	Docker · Linux · Nginx
+Windows · Git	TypeScript · HTML/CSS	ESP32 · Arduino · Grafana
 
-I work across Windows automation, Python utilities, Flutter applications, self-hosted infrastructure, and small hardware experiments. I care about reliability, thoughtful interfaces, reproducibility, and shipping software that actually helps.
-02 — What I work on
-Area	Focus
-Automation & tooling	PowerShell, Python, Windows administration, process automation
-Apps & interfaces	Flutter, Dart, local-first utilities, desktop UI
-Infrastructure	Docker, Linux, self-hosting, observability
-Embedded	ESP32, Arduino, lightweight status dashboards
 
-
-03 — Toolkit
-<p>
-  <img alt="Python" src="https://img.shields.io/badge/Python-17131d?style=flat-square&logo=python&logoColor=cb92b4" />
-  <img alt="PowerShell" src="https://img.shields.io/badge/PowerShell-17131d?style=flat-square&logo=powershell&logoColor=cb92b4" />
-  <img alt="Bash" src="https://img.shields.io/badge/Bash-17131d?style=flat-square&logo=gnubash&logoColor=cb92b4" />
-  <img alt="Flutter" src="https://img.shields.io/badge/Flutter-17131d?style=flat-square&logo=flutter&logoColor=cb92b4" />
-  <img alt="Dart" src="https://img.shields.io/badge/Dart-17131d?style=flat-square&logo=dart&logoColor=cb92b4" />
-  <img alt="SQLite" src="https://img.shields.io/badge/SQLite-17131d?style=flat-square&logo=sqlite&logoColor=cb92b4" />
-  <img alt="Docker" src="https://img.shields.io/badge/Docker-17131d?style=flat-square&logo=docker&logoColor=cb92b4" />
-  <img alt="Git" src="https://img.shields.io/badge/Git-17131d?style=flat-square&logo=git&logoColor=cb92b4" />
-  <img alt="Linux" src="https://img.shields.io/badge/Linux-17131d?style=flat-square&logo=linux&logoColor=cb92b4" />
-  <img alt="Arduino" src="https://img.shields.io/badge/Arduino%20%2F%20ESP32-17131d?style=flat-square&logo=arduino&logoColor=cb92b4" />
-</p>04 — Open-source
-Frigate Telegram Enhanced — Russian localization
-Merged contribution bringing Russian localization to the web interface and Telegram notifications of Frigate Telegram Enhanced.
-
-Public repositories & experiments
-Open-source contributions, custom setups, forks, and experiments.
-<p align="center">
-  <sub>LESS CLICKING · FEWER SURPRISES · BETTER TOOLS</sub>
+<sub>Selected tools I work with — not a checklist of every logo on the internet.</sub>
+03 / SELECTED PUBLIC WORK
+<a href="https://github.com/Limoniak/frigate-telegram-enhanced/pull/48">
+  <img src="./assets/project-frigate.svg" width="100%" alt="Frigate Telegram Enhanced: Russian localization contribution, merged PR #48" />
+</a><a href="https://github.com/tribul8ion/tribul8ion.github.io">
+  <img src="./assets/project-startpage.svg" width="100%" alt="Custom startpage: a public GitHub Pages repository" />
+</a><p><sub>Only public, verifiable work is linked here. Private projects and work systems stay private.</sub></p>04 / OPEN SOURCE & CONTACT
+Contributions  · 
+Repositories  · 
+GitHub profile
+<details>
+<summary><b>More / personal notes</b></summary>
+<br />
+I spend a lot of time somewhere between infrastructure, useful automation, interface design, and underground metal aesthetics.</details><p align="center">
+  <img src="./assets/footer.svg" alt="Less theatre. More engineering." width="100%" />
 </p>
