@@ -1,148 +1,133 @@
 #!/usr/bin/env python3
-"""Render fixed editorial SVG assets using the same visual tokens as telemetry."""
+"""Render fixed TRBL8 editorial panels; all backgrounds are dark by design."""
 from pathlib import Path
-from render_widgets import C, W, document, rect, t, horizontal, path, MW
+from xml.etree import ElementTree
+from render_widgets import C,W,MW,chrome,document,rect,path,star,t,thorns
 
-ROOT = Path(__file__).resolve().parent.parent
-ASSET = ROOT/'assets'
+ROOT=Path(__file__).resolve().parent.parent
+ASSET=ROOT/'assets'
 
-def frame(h,serial,label,right):
-    return [rect(0,0,W,h,C['panel']),rect(.5,.5,W-1,h-1,'none',C['rule']),
-            rect(36,0,84,3,C['oxide']),
-            t(36,35,f'TRBL8  /  {serial}  {label}',15,C['oxide'],700,'mono',spacing=.65),
-            t(1084,35,right,14,C['subtle'],400,'mono',anchor='end'), horizontal(54)]
 
 def operator():
-    h=176
-    a=frame(h,'00','MODUS OPERANDI','FOUR DOMAINS / ONE WORKFLOW')
-    cells=[('01','AUTOMATE','Remove the repetition.'),('02','BUILD','Ship useful software.'),
-           ('03','OPERATE','Know the system.'),('04','VERIFY','Trust the evidence.')]
-    for i,(n,head,copy) in enumerate(cells):
-        x=36+273*i
-        if i:a.append(path(f'M{x-16} 77V151',C['grid']))
-        a.extend([t(x,93,n,15,C['oxide'],700,'mono'),t(x,125,head,23,C['bone'],700),
-                  t(x,152,copy,17,C['muted'])])
-    return document(h,'Working principles: automate, build, operate, verify',a)
+    h=288;a=chrome(h,'00','THE OPERATOR')
+    a.extend([t(41,111,'Systems by trade.',41,C['bone'],500,'serif'),
+              t(41,161,'Builder by instinct.',41,C['bone'],500,'serif'),
+              t(41,206,'WINDOWS  /  LINUX  /  AUTOMATION',15,C['oxide'],700,'mono'),
+              path('M538 71V260',C['rule']),star(538,157,9,C['oxide']),
+              t(579,119,'I’m Vlad — a systems administrator who',21,C['body']),
+              t(579,148,'builds software to make everyday IT work',21,C['body']),
+              t(579,177,'more reliable, repeatable, and useful.',21,C['body']),
+              path('M579 207H1076',C['grid']),
+              t(579,238,'POWERSHELL   •   PYTHON   •   FLUTTER',15,C['muted'],600,'mono'),
+              t(579,264,'INFRASTRUCTURE   /   SELF-HOSTING',14,C['subtle'],400,'mono')])
+    return document(h,'Vlad, systems administrator building useful automation and software',a)
+
+
+def project(index,category,name,line1,line2,tag):
+    h=214;a=chrome(h,index,'WORK IN THE OPEN')
+    a.extend([t(41,110,name,34,C['bone'],500,'serif'),
+              t(42,150,category,16,C['oxide'],700,'mono'),
+              path('M592 77V188',C['rule']),star(592,133,7,C['oxide']),
+              t(630,114,line1,19,C['body']),t(630,145,line2,19,C['body']),
+              path('M630 161H1077',C['grid']),
+              t(632,193,tag,13,C['muted'],600,'mono',spacing=.5)])
+    return document(h,name+' '+line1+' '+line2,a)
+
 
 def stack():
-    h=286
-    a=frame(h,'05','TOOLCHAIN','SELECTED TOOLS / NOT AN ENDLESS BADGE WALL')
-    col=[('AUTOMATION','PowerShell','Python  /  Bash','Windows scripting'),
-         ('APPLICATIONS','Flutter  /  Dart','TypeScript  /  SQLite','Interfaces & data'),
-         ('INFRASTRUCTURE','Linux  /  Docker','Git  /  Nginx','Self-hosted systems'),
-         ('HARDWARE','ESP32','Arduino','Small connected devices')]
-    for i,(head,l1,l2,l3) in enumerate(col):
-        x=36+i*273
-        if i:a.append(path(f'M{x-17} 83V249',C['grid']))
-        a.extend([t(x,102,f'0{i+1} / {head}',15,C['oxide'],700,'mono'),
-                  t(x,154,l1,22,C['bone'],700),t(x,188,l2,19,C['body'],600),
-                  horizontal(214,x,x+246,C['grid']),
-                  t(x,238,l3,16,C['muted'])])
-    return document(h,'Technology stack: automation, apps, infrastructure and hardware',a)
+    h=285;a=chrome(h,'05','TOOLS & DISCIPLINES')
+    a.extend([t(41,112,'The toolchain.',42,C['bone'],500,'serif'),
+              t(42,149,'Selected tools, organized by what they do.',17,C['muted']),
+              path('M42 169H1077',C['grid'])])
+    cols=[('AUTOMATE','PowerShell','Python  /  Bash'),
+          ('BUILD','Flutter  /  Dart','TypeScript  /  SQLite'),
+          ('OPERATE','Linux  /  Docker','Windows  /  Nginx'),
+          ('EXPLORE','ESP32  /  Arduino','Git  /  self-hosting')]
+    for i,(title,line1,line2) in enumerate(cols):
+        x=42+i*270
+        if i:a.append(path(f'M{x-17} 187V263',C['rule']))
+        a.extend([t(x,204,f'0{i+1} / {title}',13,C['oxide'],700,'mono'),
+                  t(x,230,line1,20,C['bone'],600),
+                  t(x,257,line2,17,C['body'])])
+    return document(h,'PowerShell Python Flutter Linux Docker and ESP32 toolchain',a)
 
-def project(name, eyebrow, title, body, meta, cta):
-    h=216
-    a=frame(h,'WORK',eyebrow,meta)
-    a.extend([t(36,109,title,34,C['bone'],700),
-              t(36,143,body,20,C['body']), horizontal(169),
-              t(36,198,'PUBLIC / VERIFIABLE',14,C['muted'],400,'mono'),
-              t(1084,198,cta,15,C['oxide'],700,'mono',anchor='end')])
-    return document(h,f'{title}. {body}',a)
 
 def footer():
-    h=91
-    a=[rect(0,0,W,h,C['panel']),rect(.5,.5,W-1,h-1,'none',C['rule']),
-       rect(36,18,84,2,C['oxide']),t(36,57,'LESS THEATRE. MORE ENGINEERING.',22,C['bone'],700,'mono'),
-       t(1084,57,'TRBL8 // BUILT WITH INTENT',14,C['oxide'],700,'mono',anchor='end')]
-    return document(h,'Less theatre. More engineering.',a)
+    h=106;a=chrome(h,'END','TRANSMISSION')
+    a.extend([t(42,83,'BUILD. OPERATE. VERIFY.',29,C['bone'],500,'serif'),
+              t(1074,85,'TRIBUL8ION  /  ENGINEERING IN PRACTICE',13,C['muted'],600,'mono',anchor='end')])
+    return document(h,'Build, operate, verify — tribul8ion',a)
 
-
-def mobile_frame(h,label,right):
-    return [rect(0,0,MW,h,C['panel']), rect(.5,.5,MW-1,h-1,'none',C['rule']),
-            rect(20,0,64,3,C['oxide']),
-            t(20,28,label,12,C['oxide'],700,'mono'),
-            t(400,28,right,10,C['subtle'],400,'mono',anchor='end'),
-            path('M20 44H400',C['grid'])]
-
-def mobile_hero():
-    h=210
-    a=[rect(0,0,MW,h,C['void']),rect(.5,.5,MW-1,h-1,'none',C['rule']),
-       rect(18,18,70,2,C['oxide']),
-       t(18,40,'TRBL8  /  PERSONAL DOSSIER',10,C['muted'],600,'mono'),
-       t(18,107,'TRIBUL8ION',44,C['bone'],700,family='serif'),
-       path('M18 117H402',C['rule']),
-       t(18,144,'SYSTEMS  /  SOFTWARE  /  AUTOMATION',12,C['oxide'],700,'mono'),
-       t(18,183,'SYSADMIN BY TRADE. BUILDER BY INSTINCT.',11,C['body'],600,'mono'),
-       path('M353 20V83',C['oxide']),path('M343 30L353 20L363 30',C['oxide']),
-       path('M343 73L353 83L363 73',C['oxide']),
-       rect(350,48,6,6,'none',C['body'])]
-    return document(h,'TRIBUL8ION black metal identity on mobile',a,MW)
 
 def mobile_operator():
-    h=297;a=mobile_frame(h,'TRBL8 / WORK RITUAL','FOUR DISCIPLINES')
-    cells=[('01','AUTOMATE','Remove repetition'),('02','BUILD','Ship useful software'),
-           ('03','OPERATE','Understand systems'),('04','VERIFY','Prove it works')]
-    for i,(n,name,copy) in enumerate(cells):
-        x=20+194*(i%2);y=75+108*(i//2)
-        a.extend([t(x,y,n,12,C['oxide'],700,'mono'),t(x,y+30,name,19,C['bone'],700),
-                  t(x,y+56,copy,13,C['body'])])
-    a.extend([path('M210 63V273',C['grid']),path('M20 171H400',C['grid'])])
-    return document(h,'Automate, build, operate and verify',a,MW)
+    h=352;a=chrome(h,'00','THE OPERATOR',mobile=True)
+    a.extend([t(20,94,'Systems by trade.',29,C['bone'],500,'serif'),
+              t(20,129,'Builder by instinct.',29,C['bone'],500,'serif'),
+              path('M20 149H400',C['rule']),star(210,149,6,C['oxide']),
+              t(20,188,'I’m Vlad. I build software and automation',17,C['body']),
+              t(20,215,'for the systems I work with every day.',17,C['body']),
+              t(20,255,'Windows / Linux / PowerShell / Python',13,C['muted']),
+              t(20,280,'Flutter / self-hosted infrastructure',13,C['muted']),
+              path('M20 303H400',C['grid']),
+              t(20,329,'AUTOMATE  /  BUILD  /  OPERATE  /  VERIFY',11,C['oxide'],700,'mono')])
+    return document(h,'Vlad builds software and IT automation',a,MW)
+
+
+def mobile_project(index,heading,name,line1,line2,tag):
+    h=245;a=chrome(h,index,'PUBLIC WORK',mobile=True)
+    a.extend([t(20,96,name,27,C['bone'],500,'serif'),
+              t(20,127,heading,11,C['oxide'],700,'mono'),
+              path('M20 145H400',C['grid']),
+              t(20,178,line1,16,C['body']),t(20,202,line2,16,C['body']),
+              t(20,233,tag,11,C['muted'],600,'mono')])
+    return document(h,'Public project '+name,a,MW)
+
 
 def mobile_stack():
-    h=398;a=mobile_frame(h,'TRBL8 / TOOLCHAIN','SELECTED TOOLS')
-    columns=[('01 / AUTOMATION',['PowerShell','Python / Bash','Windows']),
-             ('02 / APPLICATIONS',['Flutter / Dart','TypeScript','SQLite']),
-             ('03 / INFRASTRUCTURE',['Linux / Docker','Git / Nginx','Self-hosted']),
-             ('04 / HARDWARE',['ESP32','Arduino','Interfaces'])]
-    for i,(name,items) in enumerate(columns):
-        x=20+195*(i%2); y=77+159*(i//2)
-        a.append(t(x,y,name,11,C['oxide'],700,'mono'))
-        for k,z in enumerate(items):a.append(t(x,y+37+k*28,z,16 if k==0 else 15,C['bone'] if k==0 else C['body'],600))
-    a.extend([path('M210 63V373',C['grid']),path('M20 222H400',C['grid'])])
-    return document(h,'Technology stack for mobile',a,MW)
+    h=398;a=chrome(h,'05','THE TOOLCHAIN',mobile=True)
+    a.extend([t(20,94,'The toolchain.',31,C['bone'],500,'serif'),
+              t(20,119,'Selected, not exhaustive.',13,C['muted']),
+              path('M20 138H400',C['grid'])])
+    cols=[('AUTOMATE','PowerShell','Python / Bash'),('BUILD','Flutter / Dart','TypeScript / SQLite'),
+          ('OPERATE','Linux / Docker','Windows / Nginx'),('EXPLORE','ESP32 / Arduino','Git / self-hosting')]
+    for i,(head,a1,a2) in enumerate(cols):
+        x=20+(i%2)*198;y=172+(i//2)*110
+        a.extend([t(x,y,f'0{i+1} / {head}',11,C['oxide'],700,'mono'),
+                  t(x,y+31,a1,17,C['bone'],600),t(x,y+59,a2,13,C['body'])])
+    a.extend([path('M207 151V374',C['rule']),path('M20 260H400',C['rule'])])
+    return document(h,'Technology stack on mobile',a,MW)
 
-def mobile_project(heading,title,line1,line2,tag):
-    h=221;a=mobile_frame(h,'TRBL8 / PUBLIC WORK',heading)
-    a.extend([t(20,87,title,25,C['bone'],700),t(20,119,line1,16,C['body']),
-              t(20,142,line2,16,C['body']),path('M20 165H400',C['grid']),
-              t(20,195,tag,12,C['oxide'],700,'mono'),
-              t(400,195,'OPEN  ↗',12,C['body'],700,'mono',anchor='end')])
-    return document(h,f'{title} {line1} {line2}',a,MW)
 
 def mobile_footer():
-    a=[rect(0,0,MW,78,C['panel']),rect(.5,.5,MW-1,77,'none',C['rule']),
-       rect(20,0,64,3,C['oxide']),t(20,44,'LESS THEATRE.',18,C['bone'],700,'mono'),
-       t(20,65,'MORE ENGINEERING.',14,C['oxide'],700,'mono')]
-    return document(78,'Less theatre. More engineering.',a,MW)
+    h=112;a=chrome(h,'END','TRANSMISSION',mobile=True)
+    a.extend([t(20,80,'Build. Operate. Verify.',22,C['bone'],500,'serif'),
+              t(20,102,'TRIBUL8ION  /  ENGINEERING IN PRACTICE',9,C['muted'],600,'mono')])
+    return document(h,'Build operate verify',a,MW)
+
+
+def render():
+    return {
+        'operator-panel.svg':operator(),
+        'project-frigate-v5.svg':project('01','OPEN SOURCE / MERGED PR #48',
+          'Frigate Telegram Enhanced','Russian localization for the web interface','and Telegram notification experience.','UPSTREAM CONTRIBUTION  /  VERIFIED'),
+        'project-startpage-v5.svg':project('02','PUBLIC REPOSITORY / CUSTOMIZATION',
+          'Personal startpage','A customized Catppuccin-based startpage','with a personal browser workspace.','FRONTEND  /  PUBLIC SOURCE'),
+        'stack-v5.svg':stack(),
+        'footer-v5.svg':footer(),
+        'mobile/operator-panel.svg':mobile_operator(),
+        'mobile/project-frigate-v5.svg':mobile_project('01','MERGED / PR #48','Frigate Telegram','Russian localization for the web UI','and notification messages.','PUBLIC / VERIFIED'),
+        'mobile/project-startpage-v5.svg':mobile_project('02','FRONTEND / CUSTOMIZATION','Personal startpage','Catppuccin-based browser startpage','customized for a personal workspace.','PUBLIC / SOURCE'),
+        'mobile/stack-v5.svg':mobile_stack(),
+        'mobile/footer-v5.svg':mobile_footer(),
+    }
+
 
 def main():
-    assets={
-      'operator-strip.svg':operator(),
-      'mobile/hero.svg':mobile_hero(),
-      'mobile/operator-strip.svg':mobile_operator(),
-      'mobile/stack.svg':mobile_stack(),
-      'mobile/project-frigate.svg':mobile_project('PR #48 / MERGED','Frigate Telegram Enhanced',
-        'Russian localization for the', 'web UI and Telegram messages.', 'MERGED / OPEN SOURCE'),
-      'mobile/project-startpage.svg':mobile_project('PUBLIC REPOSITORY','Personal startpage',
-        'Customized Catppuccin-based', 'startpage and GitHub Pages setup.', 'JAVASCRIPT / WEB'),
-      'mobile/footer.svg':mobile_footer(),
-      'stack.svg':stack(),
-      'project-frigate.svg':project('frigate','OPEN SOURCE / MERGED CONTRIBUTION',
-           'Frigate Telegram Enhanced',
-           'Russian localization across the web UI and Telegram experience.',
-           'MERGED PR #48','VIEW CONTRIBUTION  ↗'),
-      'project-startpage.svg':project('startpage','PUBLIC REPOSITORY / BROWSER STARTPAGE',
-           'Personal startpage',
-           'A customized Catppuccin-based browser startpage and GitHub Pages setup.',
-           'JAVASCRIPT / WEB','VIEW REPOSITORY  ↗'),
-      'footer.svg':footer(),
-    }
-    from xml.etree import ElementTree
-    for f,src in assets.items():
-        ElementTree.fromstring(src)
-        (ASSET/f).parent.mkdir(parents=True,exist_ok=True)
-        (ASSET/f).write_text(src,encoding='utf-8')
-    print('Generated',len(assets),'static SVGs')
+    for name,source in render().items():
+        ElementTree.fromstring(source)
+        destination=ASSET/name
+        destination.parent.mkdir(parents=True,exist_ok=True)
+        destination.write_text(source,encoding='utf-8')
+    print('OK: refreshed',len(render()),'dark static editorial panels')
 
 if __name__=='__main__':main()

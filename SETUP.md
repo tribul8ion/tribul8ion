@@ -1,35 +1,36 @@
-# TRIBUL8ION profile / maintainers' note
+# TRBL8 black-death editorial / deployment
 
-The public profile is a Markdown document with local static SVG artwork. No Node app, web server, external image API or external font dependency is required.
+This repository is the public profile for `tribul8ion`. The README uses only locally hosted SVG and PNG image assets. All imagery remains dark regardless of the GitHub site theme.
 
-## Deploy / verify
+## Deploy
 
-1. Review and merge the v4 PR into `tribul8ion/tribul8ion` after its **Validate SVG and rendering** job succeeds.
-2. In repository **Settings → Actions → General**, ensure workflow token permissions permit `contents: write` for the scheduled refresh. GitHub repository or organisation policies may override this.
-3. Open **Actions → TRBL8 / Public telemetry → Run workflow** on the default branch. This triggers the first real public-data refresh. Until it succeeds, cards deliberately say that the data is not yet available.
-4. Inspect logs for `OK: refreshed 8 SVG cards` and the resulting `chore(profile): refresh public telemetry` commit. Confirm the profile images now show current public data. GitHub image caching can delay visual changes briefly.
-5. Daily scheduled refresh runs at 05:19 UTC, subject to GitHub's best-effort scheduling.
+1. Review and merge the v5 PR after CI succeeds. The `main` push automatically runs **TRBL8 / Public telemetry** to regenerate the eight public-data SVGs with the new renderer and update versioned README URLs.
+2. Check **Actions → TRBL8 / Public telemetry**. Both **Validate SVG and rendering** and **Synchronize public data** must be green on the merge-triggered run.
+3. Open the profile in desktop and mobile view. The first successful refresh will show actual public counts, contributions for Jan–Dec, and languages with tiny auxiliary file types omitted.
+4. Scheduled telemetry refresh remains 05:19 UTC daily. GitHub may delay scheduled workflows under load; if necessary use **Run workflow** on `main`.
 
-## Local QA
+## Local validation
 
 ```bash
 python -m unittest discover -s tests -v
 python scripts/render_static.py
 python scripts/render_widgets.py --fixture tests/preview-fixture.json --out /tmp/trbl8-demo
+# Optional for regenerating identity PNG (the repo includes the actual wordmark PNG):
+pip install Pillow
+python scripts/render_hero.py
 ```
 
-Use `tests/preview-fixture.json` **only** for previews. The tracked production SVG files contain no synthetic statistics. A failed GitHub API fetch exits before writing any image. Each SVG is written using a temporary file and replace operation.
+**Do not run the fixture command with `--out assets/widgets` and commit the results.** The fixture has synthetic counts meant solely for visual testing. In production, the actual GitHub Actions token is used and README revisions are written only after a successful API fetch.
 
-## Scope / provenance
+## Source files
 
-- Signal: public profile REST fields, merged PR search and contribution calendar.
-- Activity: the public events feed, limited by GitHub's public-event retention.
-- Languages: GitHub-reported language bytes for up to 30 recently pushed public repositories owned by this account, excluding forks.
-- Contributions: GitHub GraphQL calendar. The visible count can differ from a user's total private work.
-- Mobile: distinct SVG viewports. The mobile heatmap explicitly covers 22 weeks, not a full year.
+- `assets/wordmark-blackdeath.png`: transparent user-approved gothic wordmark extract
+- `assets/hero-blackdeath-v5.png` and `assets/mobile/hero-blackdeath-v5-mobile.png`: dark imagery
+- `assets/operator-panel.svg`, `assets/project-*-v5.svg`, `assets/stack-v5.svg`, `assets/footer-v5.svg` and mobile equivalents: local static SVGs
+- `assets/widgets/{signal,heatmap,languages,activity}.svg` and `assets/widgets/mobile/*.svg`: telemetry generated on the default branch
+- `scripts/render_widgets.py`: safe public GitHub data ingestion, SVG output, and cache-busting README updates
+- `DESIGN.md`: explicit design tokens, hierarchy and accessibility guidance
 
-## Troubleshooting
+## Notes
 
-If refresh fails with `403` or a push error, verify that Actions is enabled, the bot has `contents: write`, the branch permits Actions commits and GitHub API is not rate-limiting the run. If the GraphQL step fails, verify the ephemeral token can query the user contribution calendar. Existing SVG remains on display until the next successful refresh.
-
-Read [`DESIGN.md`](DESIGN.md) for tokens, layout, accessibility rules and rationale.
+The profile measures public repository metrics only. A 365-day public contribution counter is not equal to calendar-year contribution cells. Calendar-year SVG uses **Jan → Dec** with future cells drawn as disabled; mobile summarizes months because 53 tiny weekly columns would be unreadable.

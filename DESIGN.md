@@ -1,88 +1,70 @@
-# TRIBUL8ION / Editorial Black Metal
+# TRIBUL8ION / BLACK-DEATH EDITORIAL
 
-**Version:** 4.0 · **Surface:** GitHub profile README / static SVG · **Status:** implementation specification
+**Design system:** v5 · **Surface:** GitHub profile README, generated static raster hero and SVG cards.
 
-## Design thesis
+## Direction
 
-Treat the profile as a personal *engineering dossier*, not a gamified trophy wall. The primary influence is the exacting product-UI restraint documented in the `awesome-design-md` **Linear** reference: near-black planes, hairline separation, one chromatic accent and clear reading order. **Wired** contributes an editorial hierarchy that separates a distinctive serif display from functional body type; **IBM** contributes system-like modular grids and matter-of-fact labels. The distressed black-metal sigil and thorn motif are our original brand layer, reserved mainly for the hero.
+A death-metal wordmark sits on an *ink-black*, textured editorial surface. The surrounding cards are functional, deliberate and readable: think underground metal sleeve art executed with the hierarchy of a careful systems dashboard. This visual approach is adapted from the user's supplied reference board and user-approved dark palette. The layout principles draw from the `awesome-design-md` Linear reference (one accent, dense information, hairline rules) and Wired editorial analysis (large serif headlines, smaller functional metadata).
 
-This is an adaptation of principles, **not** copied assets or a claim that any reference represents the current live website.
+**Every profile visual has an opaque black surface.** There is no white, parchment or cream canvas. Bone is used for typography and engraving highlights, not as a background. GitHub's own surrounding website theme is controlled by GitHub and outside the README's control.
 
-## Principles
+## Palette
 
-1. **One strong artifact per section.** The hero is the emotional element; telemetry is neutral and legible.
-2. **Hierarchy beats density.** 3 information levels: primary title / data / explanatory note. No tiny decorative junk.
-3. **Concrete claims only.** Public, verifiable repositories; activity never simulated in production.
-4. **No shadows, glows or gradients in data cards.** Use subtle surface changes and 1 px rules instead.
-5. **Accessibility is a constraint.** Alt text, real Markdown narrative, explicit data provenance and fallback copy.
-6. **Responsive by design.** A phone / narrow GitHub layout uses specially composed 420-px SVGs; it never shrinks the full desktop chart to illegibility.
-7. **No external rendering dependency.** Images are static SVG files generated in the repository; no CSS, JS or webfonts are injected into Markdown.
+| Token | Value | Usage |
+|---|---|---|
+| Void | `#080809` | Main hero background, deepest black |
+| Panel | `#101013` | Cards, dark editorial modules |
+| Secondary | `#171417` | Future/unavailable chart cells |
+| Grid | `#30292D` | Hairlines and empty heatmap units |
+| Rule | `#524044` | Frame, panel separators |
+| Bone | `#F1E9DE` | Headlines and metric figures |
+| Body | `#D8CCC2` | Narrative/body copy |
+| Muted | `#BDAEAA` | Supporting text |
+| Subtle | `#AB9A98` | Timestamps/footnotes |
+| Rust | `#D28466` | Short accents, section numbers, ornaments |
+| Rust muted | `#A56661` | Small ornament highlights |
+| Blood | `#A24D55` | Graph data accents |
 
-## Color tokens
+The heatmap uses five restrained ink tones, from charcoal to warm bone/rust. **No gradients, neon glows or colorful technology badges.**
 
-| Token | Hex | Purpose |
-| --- | --- | --- |
-| `void` | `#09090B` | Main identity background |
-| `panel` | `#100F12` | Data card surface |
-| `secondary` | `#171519` | Reserved secondary surface |
-| `grid` | `#302B30` | Chart skeleton / minor rules |
-| `rule` | `#42383E` | Main card boundary |
-| `bone` | `#F0E9DE` | Primary title and metric values |
-| `body` | `#CCC1B9` | Body text |
-| `muted` | `#AAA0A0` | Secondary descriptions |
-| `subtle` | `#8F8588` | Timestamps, source labels |
-| `oxide` | `#C17176` | One accent: section identity, short bars |
-| `oxide_soft` | `#976166` | Reserved muted emphasis |
+## Typography & rhythm
 
-**Chart sequence:** `#28242A` → `#5C343E` → `#89505A` → `#B87877` → `#E7B7A4`. Never treat color as the only representation of meaning: a chart label and readable numerical value accompany comparisons.
+The original supplied blackletter wordmark is isolated as a transparent raster engraving. It remains a display asset only, not an all-purpose font.
 
-## Typography
+- **Primary panel headlines:** Georgia / DejaVu Serif 37–42 units, medium weight, compact two-line rhythm. Mobile 26–31.
+- **Body text:** Arial / Liberation Sans 16–21, regular. Mobile 13–17.
+- **Metrics:** Georgia/DejaVu Serif 59 on desktop, 46 on mobile, with larger line height.
+- **Machine labels:** Consolas / DejaVu Sans Mono 11–15, uppercase, rust accent.
+- **Grid:** 1120 viewBox desktop, 420 mobile. Desktop left narrative / right data. Mobile reflow is purpose-made, never a CSS scaled-down desktop panel.
+- **Spacing:** 4px microgrid, strong 20–40px content padding, 1px frame and section hairlines.
 
-| Role | Desktop SVG | Mobile SVG | Typeface / fallback |
-| --- | --- | --- | --- |
-| Hero identity | Existing serif wordmark | 44px | Georgia → DejaVu Serif → serif |
-| Main card heading | 32px / 700 | 23px / 700 | Arial → Liberation Sans → sans-serif |
-| Main body / explainer | 17–20px | 13–16px | Arial → Liberation Sans → sans-serif |
-| Metric numbers | 63px / 700 | 42px / 700 | Arial → Liberation Sans → sans-serif |
-| Eyebrows / machine labels | 15–16px / 700 | 11–13px / 700 | Consolas → DejaVu Sans Mono → monospace |
-| Minor caption | 13–14px | 11px | Monospace, subdued color |
+No font files are bundled. The glyph rendering uses standard fallbacks; the bitmap wordmark remains visually exact without a runtime font requirement.
 
-User-agent rendering of GitHub is outside our control. **Do not rely on a specific installed proprietary font.** The SVG must look intentional with its fallbacks and must not attempt to embed font files. The README body uses GitHub's own text rendering, not a custom font hack.
+## Modules
 
-## Layout grid
+1. **Hero:** identity-first dark sleeve with ornate lettering and tiny industrial metadata.
+2. **Operator:** real professional summary, not overlong personal questionnaire.
+3. **Public work:** two checked public links, with reserved space and genuine contribution claims.
+4. **Public signal:** four public metrics, deliberately unlabeled synthetic totals.
+5. **Contribution archive:** year ALWAYS runs January to December; months after the latest data date are shown as unavailable, never zero activity.
+6. **Code footprint:** share of public non-fork code bytes; zero-percent slivers, `Just` file type and under-0.5% entries are omitted.
+7. **Transmissions:** latest public API events, not a complete history or private audit stream.
+8. **Toolchain:** four purposeful domains; no badge wall.
 
-- **Desktop:** 1120 SVG units, 36-unit horizontal content inset, 84-unit section marker, 4-point micro rhythm, 273-unit data columns. Every full-width SVG stands alone.
-- **Mobile:** 420 SVG units, 20-unit inset, layout reflows to 2×2 metrics and up to 22 weeks of contribution cells, labelled accurately.
-- **Spacing:** desktop 12–20 between line items, 30–40 between content bands; primary data baseline is aligned within its grid.
-- **Shapes:** squared corners; 1 px strokes; almost no decorative container nesting; chart squares with no radius.
-- **Contrast:** `bone`, `body`, `muted`, `subtle`, `oxide` are all tested for at least 4.5:1 against `panel` using WCAG relative luminance.
+## Accessibility & quality gates
 
-## Content / hierarchy
+- Each SVG has a descriptive `<title>`/`aria-label`; README images have `alt` text.
+- First rendered profile load has no third-party hosted images, tracking URLs, external CSS/fonts or executable scripts.
+- Text and grid colors are measured against opaque panel backgrounds; secondary text must meet 4.5:1 for body-size use.
+- Safe XML escaping, directional-control stripping and length constraints for untrusted API values.
+- Production failure preserves previous image data; fixture mode does not rewrite README.
+- Two independent layouts: desktop 1120 and mobile 420; hero desktop+mobile are raster assets rendered from one transparent wordmark.
+- GitHub HTML restrictions require static images; no client-side scripting or SVG animation.
 
-1. **Hero:** `TRIBUL8ION` and the short systems/automation/engineering identity statement.
-2. **About:** real paragraph in GitHub Markdown; not an SVG-only biography.
-3. **Operator strip:** automate → build → operate → verify.
-4. **Work in the open:** two externally verifiable public items. The Frigate PR is merged; the startpage is described as a customization, not an original invention.
-5. **Public telemetry:** 4 individually legible, vertical full-width cards. Fallbacks show no fictional stats.
-6. **Toolchain:** role-grouped, not 30 colored logos or unqualified skill levels.
-7. **Footer:** a single piece of brand language, no automatic music or trackers.
+## Generated assets & privacy
 
-## Data / privacy policy
+`render_static.py` generates the fixed editorial SVG components. `render_hero.py` builds dark PNG identity banners from the local extracted wordmark. `render_widgets.py` queries GitHub public metadata on schedule, renders eight desktop/mobile SVGs and updates the README's content-addressed cache keys. Fixtures are test-only. No private repository detail or environment secret becomes visible inside generated SVGs.
 
-`render_widgets.py` may query GitHub REST and GraphQL using Actions' ephemeral `GITHUB_TOKEN`. It gathers only public-profile stats, search results accessible to the profile-repository token, public non-fork repository language breakdowns and the public events feed. It must not request private repository names, serialize arbitrary payloads into SVG, or log credentials. User-provided strings are XML-escaped and constrained before insertion.
+## Exclusions
 
-**Semantics:** public merged PRs are not the same as contributions; language footprint is size-based, not proficiency; event feeds are incomplete by design. The phone graph shows the **most recent 22 weeks**, while the annual count still refers to the calendar's rolling year.
-
-## Rendering constraints / quality gates
-
-- SVG `<title>` and README `<img alt>` must be present.
-- No `<foreignObject>`, executable JavaScript, embedded base64 images or external font/image references.
-- Desktop and mobile snapshots at 1440 px and 390 px viewport widths.
-- No clipped text or chart labels, no horizontal scrolling on mobile, no malformed XML.
-- Automated unit tests check DOM, escaping, paths, contrast, placeholder state and the API fixture.
-- Production SVGs remain blank or explicitly unavailable before the first successful authenticated fetch. Synthetic fixture numbers appear **only** in the documented visual demo.
-- Scheduled workflow updates only generated widget files; PR workflows run local tests and have read-only permission.
-
-## Deliberate exclusions
-
-No GitHub trophies, random badges, public music status, visitor tracker or unsupported «all languages» claims. No endless widgets added just for decoration. Features should reflect verifiable work and justified user value, not template completeness.
+No visitor trackers, Spotify widgets, GitHub Trophies, arbitrary unverified skill badges, fake contributions or promotional copy. Design details must support the user's real work rather than bury it.
