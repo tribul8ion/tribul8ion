@@ -1,21 +1,61 @@
-name: TRBL8 // Refresh public telemetry
+name: TRBL8 / Public telemetry
 
 on:
+  pull_request:
+    paths:
+      - 'README.md'
+      - 'DESIGN.md'
+      - 'assets/**'
+      - 'scripts/**'
+      - 'tests/**'
+      - '.github/workflows/refresh-widgets.yml'
   workflow_dispatch:
   schedule:
-    - cron: '19 5 * * *' # GitHub schedules run in UTC and may be delayed
+    - cron: '19 5 * * *'
 
 permissions:
-  contents: write
+  contents: read
 
 concurrency:
-  group: trbl8-profile-telemetry
+  group: trbl8-profile-${{ github.ref }}
   cancel-in-progress: false
 
 jobs:
-  refresh:
+  quality:
+    name: Validate SVG and rendering
     runs-on: ubuntu-latest
-    timeout-minutes: 8
+    timeout-minutes: 7
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Unit tests
+        run: python -m unittest discover -s tests -v
+      - name: Deterministic fixture and XML smoke
+        run: |
+          python scripts/render_widgets.py --fixture tests/preview-fixture.json --out "$RUNNER_TEMP/fixture"
+          python - "$RUNNER_TEMP/fixture" <<'PY'
+          from pathlib import Path
+          from xml.etree import ElementTree as ET
+          import sys
+          folder = Path(sys.argv[1])
+          cards = sorted(folder.glob('*.svg'))
+          assert len(cards) == 4, [x.name for x in cards]
+          assert len(list((folder/"mobile").glob("*.svg"))) == 4
+          for card in cards:
+              ET.parse(card)
+          print('PASS: 4 SVG cards parsed')
+          PY
+
+  refresh:
+    name: Synchronize public data
+    if: github.event_name != 'pull_request'
+    needs: quality
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
     steps:
       - uses: actions/checkout@v4
         with:
@@ -23,15 +63,15 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - name: Rebuild widgets from public GitHub data
+      - name: Read public GitHub data and render static cards
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: python scripts/render_widgets.py
-      - name: Commit only changed SVG cards
+      - name: Commit only updated telemetry graphics
         run: |
-          git add assets/widgets/signal.svg assets/widgets/heatmap.svg assets/widgets/languages.svg assets/widgets/activity.svg
+          git add assets/widgets/signal.svg assets/widgets/heatmap.svg assets/widgets/languages.svg assets/widgets/activity.svg assets/widgets/mobile/*.svg
           if git diff --cached --quiet; then
-            echo 'No telemetry changes'
+            echo 'No public data changes.'
             exit 0
           fi
           git config user.name 'github-actions[bot]'
