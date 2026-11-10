@@ -31,7 +31,9 @@ C = {
     'grid':'#30292D', 'rule':'#524044', 'bone':'#F1E9DE',
     'body':'#D8CCC2', 'muted':'#BDAEAA', 'subtle':'#AB9A98',
     'oxide':'#D28466', 'oxide_soft':'#A56661', 'blood':'#A24D55',
-    'low':'#33282E'
+    'low':'#33282E',
+    'ornament':'#BC9494', 'oxide_dark':'#895761', 'grit':'#D2B4A1',
+    'outline':'#685157'
 }
 HEAT = (C['low'], '#653B46', '#92525F', '#C07472', '#F0BA9A')
 SANS = "Arial,'Liberation Sans',sans-serif"
@@ -90,19 +92,61 @@ def document(height,label,parts,width=W):
     return svg
 
 
+def filigree(x,y,horizontal=1,vertical=1,scale=1):
+    """Mirrored SVG thorns drawn without remote imagery."""
+    pale=C['ornament'];dark=C['oxide_dark']
+    pairs=[
+      ('M4 6 C24 10 46 1 65 6 C88 12 109 9 140 3',pale,2.1,.79),
+      ('M9 7 C19 25 16 40 8 69 C18 43 23 26 26 13',pale,1.6,.78),
+      ('M14 8 C31 2 51 5 67 9 C87 14 113 10 137 6',dark,.9,.9),
+      ('M29 8 C41 24 52 18 63 14 C46 13 42 7 39 2',pale,1.5,.78),
+      ('M48 7 C57 0 67 2 73 -5 C71 5 63 15 54 16',pale,1.4,.87),
+      ('M78 9 C86 21 101 22 105 36 C103 21 109 14 122 9',pale,1.4,.76),
+      ('M103 10 C116 18 131 11 141 2',dark,1.4,.85),
+      ('M12 23 C26 32 30 45 24 57 C24 38 17 36 12 36',dark,1.8,.88),
+      ('M8 38 C4 45 10 54 3 74',pale,1.2,.61),
+      ('M19 24 C35 30 29 52 41 63 C31 46 43 41 50 38',dark,1.3,.7)]
+    return (f'<g transform="translate({x} {y}) scale({horizontal*scale} {vertical*scale})">'
+            +''.join(path(d,c,w,opacity=o) for d,c,w,o in pairs)+star(84,9,2.5,C['oxide'])+'</g>')
+
+
+def analog_texture(width,height,mobile=False):
+    a=[]
+    for i in range(80 if mobile else 165):
+        x=12+((i*173+i*i*7)%max(1,width-24))
+        y=7+((i*67+i*i*3)%max(1,height-14))
+        if 30<x<width-30 and 28<y<height-28:continue
+        length=1.5+(i%5)*.7
+        a.append(path(f'M{x:.1f} {y:.1f}l{length:.1f} {(-.7 if i%2 else .7):.1f}',
+                      C['grit'],.7,opacity=.23+(i%3)*.08))
+    return ''.join(a)
+
+
+def blackdeath_edges(width,height,mobile=False):
+    top_scale=.30 if mobile else .57
+    lower_scale=.52 if mobile else .79
+    m=7
+    return ''.join([
+       path(f'M{m} 20V{height-20}M{width-m} 20V{height-20}',C['oxide_dark'],.9,opacity=.75),
+       path(f'M{88 if mobile else 120} 7H{width-(88 if mobile else 120)}',C['ornament'],1,opacity=.48),
+       path(f'M{88 if mobile else 120} {height-8}H{width-(88 if mobile else 120)}',C['ornament'],1,opacity=.48),
+       filigree(1,4,1,1,top_scale),filigree(width-1,4,-1,1,top_scale),
+       filigree(1,height-4,1,-1,lower_scale),filigree(width-1,height-4,-1,-1,lower_scale),
+       star(width/2,7,4.7 if mobile else 6.5,C['oxide']),
+       star(width/2,height-7,4 if mobile else 5,C['oxide_soft'])])
+
+
 def chrome(h,serial,label,data=None,mobile=False):
     width=MW if mobile else W
     inset=20 if mobile else 34
     stamp_value=stamp(data) if data is not None else 'AUTHOR MARK / EDITORIAL'
-    a=[rect(0,0,width,h,C['panel']),rect(.5,.5,width-1,h-1,'none',C['rule']),
-       rect(inset,0,65 if mobile else 86,3,C['oxide']),
+    return [rect(0,0,width,h,C['panel']),
+       rect(.5,.5,width-1,h-1,'none',C['outline']),
+       analog_texture(width,h,mobile),blackdeath_edges(width,h,mobile),
+       rect(inset,0,68 if mobile else 91,3,C['oxide']),
        path(f'M{inset} {49 if mobile else 56}H{width-inset}',C['grid']),
        t(inset,29 if mobile else 36,f'TRBL8 / {serial}' if mobile else f'TRBL8  /  {serial}  {label}',12 if mobile else 15,C['oxide'],700,'mono',spacing=.45 if not mobile else 0),
-       t(width-inset,29 if mobile else 37,stamp_value,10 if mobile else 13,C['subtle'],400,'mono',anchor='end'),
-       thorns(0,h-8,1,.45 if mobile else .72),
-       thorns(width,h-8,-1,.45 if mobile else .72),
-       star(width-23,h-21,4,C['oxide_soft'])]
-    return a
+       t(width-inset,29 if mobile else 37,stamp_value,10 if mobile else 13,C['subtle'],400,'mono',anchor='end')]
 
 
 def stamp(data):

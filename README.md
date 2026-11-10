@@ -15,23 +15,23 @@
 <!-- 00 / THE OPERATOR -->
 <p align="center">
   <picture>
-    <source media="(max-width: 800px)" srcset="./assets/mobile/operator-panel.svg?v=5" />
-    <img src="./assets/operator-panel.svg?v=5" width="100%" alt="About Vlad: systems administrator building reliable software, automation and self-hosted infrastructure." />
+    <source media="(max-width: 800px)" srcset="./assets/mobile/operator-panel.svg?v=51" />
+    <img src="./assets/operator-panel.svg?v=51" width="100%" alt="About Vlad: systems administrator building reliable software, automation and self-hosted infrastructure." />
   </picture>
 </p>
 
 <!-- 01 / WORK IN THE OPEN -->
 <a href="https://github.com/Limoniak/frigate-telegram-enhanced/pull/48">
   <picture>
-    <source media="(max-width: 800px)" srcset="./assets/mobile/project-frigate-v5.svg?v=5" />
-    <img src="./assets/project-frigate-v5.svg?v=5" width="100%" alt="Frigate Telegram Enhanced — merged pull request 48, adding Russian localization to the web interface and Telegram notifications." />
+    <source media="(max-width: 800px)" srcset="./assets/mobile/project-frigate-v5.svg?v=51" />
+    <img src="./assets/project-frigate-v5.svg?v=51" width="100%" alt="Frigate Telegram Enhanced — merged pull request 48, adding Russian localization to the web interface and Telegram notifications." />
   </picture>
 </a>
 
 <a href="https://github.com/tribul8ion/tribul8ion.github.io">
   <picture>
-    <source media="(max-width: 800px)" srcset="./assets/mobile/project-startpage-v5.svg?v=5" />
-    <img src="./assets/project-startpage-v5.svg?v=5" width="100%" alt="Personal startpage — a public customized Catppuccin-based startpage and browser workspace." />
+    <source media="(max-width: 800px)" srcset="./assets/mobile/project-startpage-v5.svg?v=51" />
+    <img src="./assets/project-startpage-v5.svg?v=51" width="100%" alt="Personal startpage — a public customized Catppuccin-based startpage and browser workspace." />
   </picture>
 </a>
 
@@ -70,15 +70,15 @@
 <!-- 06 / TOOLCHAIN -->
 <p align="center">
   <picture>
-    <source media="(max-width: 800px)" srcset="./assets/mobile/stack-v5.svg?v=5" />
-    <img src="./assets/stack-v5.svg?v=5" width="100%" alt="Tools for automation, applications, infrastructure and hardware: PowerShell, Python, Bash, Flutter, Dart, TypeScript, SQLite, Linux, Docker, Windows, Nginx, ESP32 and Arduino." />
+    <source media="(max-width: 800px)" srcset="./assets/mobile/stack-v5.svg?v=51" />
+    <img src="./assets/stack-v5.svg?v=51" width="100%" alt="Tools for automation, applications, infrastructure and hardware: PowerShell, Python, Bash, Flutter, Dart, TypeScript, SQLite, Linux, Docker, Windows, Nginx, ESP32 and Arduino." />
   </picture>
 </p>
 
 <p align="center">
   <picture>
-    <source media="(max-width: 800px)" srcset="./assets/mobile/footer-v5.svg?v=5" />
-    <img src="./assets/footer-v5.svg?v=5" width="100%" alt="Build. Operate. Verify." />
+    <source media="(max-width: 800px)" srcset="./assets/mobile/footer-v5.svg?v=51" />
+    <img src="./assets/footer-v5.svg?v=51" width="100%" alt="Build. Operate. Verify." />
   </picture>
 </p>
 

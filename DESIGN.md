@@ -1,6 +1,6 @@
 # TRIBUL8ION / BLACK-DEATH EDITORIAL
 
-**Design system:** v5 · **Surface:** GitHub profile README, generated static raster hero and SVG cards.
+**Design system:** v5.1 · **Surface:** GitHub profile README, generated static raster hero and SVG cards.
 
 ## Direction
 
@@ -39,6 +39,12 @@ The original supplied blackletter wordmark is isolated as a transparent raster e
 - **Spacing:** 4px microgrid, strong 20–40px content padding, 1px frame and section hairlines.
 
 No font files are bundled. The glyph rendering uses standard fallbacks; the bitmap wordmark remains visually exact without a runtime font requirement.
+
+## Engraved frame / v5.1
+
+All 18 static and dynamic desktop/mobile SVG panels share four mirrored vector thorn clusters, dark background, bone-and-oxblood lines and deterministic low-ink scratches. This replaces the older rectangle-only frame after Personal startpage.
+
+Static README image references are cache-busted with `?v=51`. Dynamic SVGs remain versioned by the renderer's content hash; no synthetic metrics are shipped.
 
 ## Modules
 
