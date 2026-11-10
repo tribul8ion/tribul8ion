@@ -1,18 +1,16 @@
 #!/usr/bin/env python3
-"""TRBL8 / self-hosted GitHub profile graphics.
+"""TRBL8 black/death-metal editorial telemetry: public GitHub data -> safe SVG.
 
-The generator has one deliberately small responsibility: transform public GitHub
-API data into accessible, static, dependency-free SVG. It never needs private
-repository metadata, embeds no remote resources, and leaves old SVGs intact
-when API retrieval fails.
+No external image URLs, scripts, runtime fonts or private GitHub data are used.
+Offline fixtures can never update the tracked README's production image URLs.
 """
 from __future__ import annotations
 
 import argparse
-import hashlib
 from collections import Counter
 from datetime import date, datetime, timedelta, timezone
 from html import escape
+import hashlib
 import json
 import math
 import os
@@ -26,215 +24,324 @@ from xml.etree import ElementTree
 USER = 'tribul8ion'
 ROOT = Path(__file__).resolve().parent.parent
 OUT = ROOT / 'assets/widgets'
-
-# TRBL8 editorial / black-metal tokens. See DESIGN.md.
+W = 1120
+MW = 420
 C = {
-    'void': '#09090B',
-    'panel': '#100F12',
-    'secondary': '#171519',
-    'grid': '#302B30',
-    'rule': '#42383E',
-    'bone': '#F0E9DE',
-    'body': '#CCC1B9',
-    'muted': '#AAA0A0',
-    'subtle': '#8F8588',
-    'oxide': '#C17176',
-    'oxide_soft': '#976166',
+    'void':'#080809', 'panel':'#101013', 'secondary':'#171417',
+    'grid':'#30292D', 'rule':'#524044', 'bone':'#F1E9DE',
+    'body':'#D8CCC2', 'muted':'#BDAEAA', 'subtle':'#AB9A98',
+    'oxide':'#D28466', 'oxide_soft':'#A56661', 'blood':'#A24D55',
+    'low':'#33282E'
 }
-HEAT = ('#28242A', '#5C343E', '#89505A', '#B87877', '#E7B7A4')
-# Public SVGs must use system fonts: don't reference a proprietary font or a CDN.
+HEAT = (C['low'], '#653B46', '#92525F', '#C07472', '#F0BA9A')
 SANS = "Arial,'Liberation Sans',sans-serif"
 SERIF = "Georgia,'DejaVu Serif',serif"
-MONO = "Consolas,'DejaVu Sans Mono','Liberation Mono',monospace"
-W = 1120
+MONO = "Consolas,'DejaVu Sans Mono',monospace"
 
 
 def safe_string(value, limit=70):
     s = str(value if value is not None else '')
-    s = ''.join(ch for ch in s if ch.isprintable() and ch not in '\u202a\u202b\u202c\u202d\u202e\u2066\u2067\u2068\u2069')
+    s = ''.join(c for c in s if c.isprintable() and c not in '\u202a\u202b\u202c\u202d\u202e\u2066\u2067\u2068\u2069')
     s = re.sub(r'\s+', ' ', s).strip()
     return s if len(s) <= limit else s[:limit-1].rstrip() + '…'
 
 
-def t(x, y, text, size=18, color=None, weight=400, family='sans', anchor=None, spacing=None):
-    face = SANS if family == 'sans' else (SERIF if family == 'serif' else MONO)
-    color = color or C['body']
-    attrs = [f'x="{x}"', f'y="{y}"', f'font-family="{face}"',
-             f'font-size="{size}"', f'font-weight="{weight}"', f'fill="{color}"']
-    if anchor: attrs.append(f'text-anchor="{anchor}"')
-    if spacing is not None: attrs.append(f'letter-spacing="{spacing}"')
-    return f'<text {" ".join(attrs)}>{escape(safe_string(text, 140), quote=False)}</text>'
+def t(x, y, value, size=18, color=None, weight=400, family='sans', anchor=None, spacing=None):
+    face={'sans':SANS,'serif':SERIF,'mono':MONO}[family]
+    props=[f'x="{x}"',f'y="{y}"',f'font-family="{face}"',f'font-size="{size}"',
+           f'font-weight="{weight}"',f'fill="{color or C["body"]}"']
+    if anchor: props.append(f'text-anchor="{anchor}"')
+    if spacing is not None: props.append(f'letter-spacing="{spacing}"')
+    return f'<text {" ".join(props)}>{escape(safe_string(value, 140), quote=False)}</text>'
 
 
-def rect(x, y, w, h, fill='none', stroke=None, stroke_width=1):
-    parts = [f'x="{x}"', f'y="{y}"', f'width="{w}"', f'height="{h}"', f'fill="{fill}"']
-    if stroke:
-        parts.extend([f'stroke="{stroke}"', f'stroke-width="{stroke_width}"'])
-    return f'<rect {" ".join(parts)}/>'
+def rect(x,y,w,h,fill='none',stroke=None,stroke_width=1):
+    props=f'x="{x}" y="{y}" width="{w}" height="{h}" fill="{fill}"'
+    if stroke: props+=f' stroke="{stroke}" stroke-width="{stroke_width}"'
+    return f'<rect {props}/>'
 
 
-def path(d, stroke, sw=1):
-    return f'<path d="{d}" stroke="{stroke}" stroke-width="{sw}" fill="none"/>'
+def path(d, stroke, sw=1, fill='none', opacity=1):
+    return f'<path d="{d}" stroke="{stroke}" stroke-width="{sw}" fill="{fill}" opacity="{opacity}"/>'
 
 
-def horizontal(y, from_x=36, to_x=1084, color=None):
-    return path(f'M{from_x} {y}H{to_x}', color or C['grid'])
+def star(x,y,r=10, color=None):
+    color = color or C['oxide']
+    d=f'M{x} {y-r*2} L{x+r*.22} {y-r*.19} L{x+r*1.25} {y} L{x+r*.22} {y+r*.19} L{x} {y+r*2} L{x-r*.22} {y+r*.19} L{x-r*1.25} {y} L{x-r*.22} {y-r*.19} Z'
+    return f'<path d="{d}" fill="{color}"/>'
 
 
-def document(height, label, parts, width=W):
-    return (f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {width} {height}" '
-            f'width="{width}" height="{height}" role="img" aria-label="{escape(label, quote=True)}">'
-            f'<title>{escape(label)}</title>' + ''.join(parts) + '</svg>')
+def thorns(x,y,flip=1,scale=1,color=None):
+    color = color or C['rule']
+    sign=1 if flip>0 else -1
+    def coord(dx,dy):return f'{x+sign*dx*scale:.1f},{y+dy*scale:.1f}'
+    return ''.join([
+      path(f'M{coord(0,0)} Q{coord(25,-12)} {coord(67,0)} Q{coord(97,3)} {coord(127,-8)}',color,1.45,opacity=.72),
+      path(f'M{coord(44,-4)} Q{coord(32,-20)} {coord(45,-34)} Q{coord(42,-17)} {coord(53,-4)}',color,1.35,opacity=.72),
+      path(f'M{coord(84,1)} Q{coord(102,19)} {coord(99,28)} Q{coord(99,11)} {coord(90,0)}',color,1.25,opacity=.72)
+    ])
 
 
-def stamp(data):
-    value = str(data.get('updated_at') or '')
-    return ('SYNC  /  '+value[:10]+' UTC') if re.fullmatch(r'\d{4}-\d{2}-\d{2}T.*', value) else 'AWAITING FIRST SYNC'
+def document(height,label,parts,width=W):
+    svg=(f'<svg xmlns="http://www.w3.org/2000/svg" width="{width}" height="{height}" '
+         f'viewBox="0 0 {width} {height}" role="img" aria-label="{escape(label,quote=True)}">'
+         f'<title>{escape(label)}</title>'+''.join(parts)+'</svg>')
+    ElementTree.fromstring(svg)
+    return svg
 
 
-def shell(h, n, eyebrow, title, subtitle, data, foot):
-    a = [rect(0, 0, W, h, C['panel']), rect(.5, .5, W-1, h-1, 'none', C['rule']),
-         rect(36, 0, 84, 3, C['oxide']),
-         t(36, 35, f'TRBL8  /  {n}  {eyebrow}', 15, C['oxide'], 700, 'mono', spacing=.8),
-         t(1084, 35, stamp(data), 14, C['subtle'], 400, 'mono', anchor='end'),
-         t(36, 83, title, 32, C['bone'], 700),
-         t(36, 112, subtitle, 17, C['muted']),
-         horizontal(133), horizontal(h-43),
-         t(36, h-17, foot, 14, C['subtle'], 400, 'mono')]
+def chrome(h,serial,label,data=None,mobile=False):
+    width=MW if mobile else W
+    inset=20 if mobile else 34
+    stamp_value=stamp(data) if data is not None else 'AUTHOR MARK / EDITORIAL'
+    a=[rect(0,0,width,h,C['panel']),rect(.5,.5,width-1,h-1,'none',C['rule']),
+       rect(inset,0,65 if mobile else 86,3,C['oxide']),
+       path(f'M{inset} {49 if mobile else 56}H{width-inset}',C['grid']),
+       t(inset,29 if mobile else 36,f'TRBL8 / {serial}' if mobile else f'TRBL8  /  {serial}  {label}',12 if mobile else 15,C['oxide'],700,'mono',spacing=.45 if not mobile else 0),
+       t(width-inset,29 if mobile else 37,stamp_value,10 if mobile else 13,C['subtle'],400,'mono',anchor='end'),
+       thorns(0,h-8,1,.45 if mobile else .72),
+       thorns(width,h-8,-1,.45 if mobile else .72),
+       star(width-23,h-21,4,C['oxide_soft'])]
     return a
 
 
-def number(n):
-    return '—' if n is None else f'{int(n):,}'
+def stamp(data):
+    value=str(data.get('updated_at') or '')
+    return ('SYNC / '+value[:10]+' UTC') if re.fullmatch(r'\d{4}-\d{2}-\d{2}T.*',value) else 'AWAITING FIRST SYNC'
 
 
-def signal(data):
-    h=307
-    a=shell(h,'01','PUBLIC SIGNAL', 'GitHub, in public.',
-            'A snapshot of visible work. No private repositories or internal metrics.',data,
-            'SOURCE  /  GITHUB REST + GRAPHQL    •    PUBLIC VISIBILITY ONLY')
-    series=(('PUBLIC REPOS', data.get('public_repos'), 'VISIBLE OWNED / FORKED'),
-            ('MERGED PRS', data.get('merged_prs'), 'PUBLIC MERGED REQUESTS'),
-            ('CONTRIBUTIONS', data.get('annual_contributions'), 'ROLLING YEAR / VISIBLE'),
-            ('FOLLOWERS',data.get('followers'),'PUBLIC GITHUB PROFILE'))
-    for i,(label,value,note) in enumerate(series):
-        x=36+i*273
-        if i: a.append(path(f'M{x-18} 151V249',C['grid']))
-        a.extend((t(x,169,label,16,C['oxide'],700,'mono'),
-                  t(x,226,number(value),63,C['bone'],700),
-                  t(x,252,note,13,C['muted'],400,'mono')))
-    return document(h,'GitHub public repos, merged PRs, contributions and followers',a)
+def number(value):
+    return '—' if value is None else f'{int(value):,}'
 
 
 def parse_days(data):
     raw=data.get('contribution_days')
-    if not isinstance(raw,list) or not raw: return None
-    d={}
-    for row in raw:
-        if not isinstance(row,dict): continue
+    if not isinstance(raw,list) or not raw:return None
+    days={}
+    for item in raw:
+        if not isinstance(item,dict):continue
         try:
-            day=date.fromisoformat(row['date'])
-            value=int(row['count'])
-            if value>=0: d[day]=value
-        except (KeyError,ValueError,TypeError,OverflowError): continue
-    return d or None
+            day=date.fromisoformat(item['date']); count=int(item['count'])
+            if count >=0:days[day]=count
+        except (ValueError,KeyError,TypeError,OverflowError):continue
+    return days or None
+
+
+def calendar_year(data):
+    value=str(data.get('updated_at') or '')[:10]
+    try: return date.fromisoformat(value).year
+    except (ValueError,TypeError):
+        return max(parse_days(data) or {date.today():0}).year
+
+
+def year_total(data,year=None):
+    d=parse_days(data)
+    if d is None:return None
+    year=year or calendar_year(data)
+    return sum(count for day,count in d.items() if day.year==year)
+
+
+def signal(data):
+    h=322;a=chrome(h,'01','PUBLIC SIGNAL',data)
+    a.extend([t(40,107,'GitHub, in public.',38,C['bone'],500,'serif'),
+              t(40,139,'Verified activity. Public-facing repositories only.',19,C['muted']),
+              path('M40 158H1080',C['grid'])])
+    values=[('PUBLIC REPOS',data.get('public_repos'),'VISIBLE REPOSITORIES'),
+            ('MERGED PRS',data.get('merged_prs'),'PUBLIC CONTRIBUTIONS'),
+            ('CONTRIBUTIONS',data.get('annual_contributions'),'ROLLING 365 DAYS'),
+            ('FOLLOWERS',data.get('followers'),'PUBLIC FOLLOWERS')]
+    for i,(key,value,foot) in enumerate(values):
+        x=40+i*270
+        if i:a.append(path(f'M{x-17} 171V279',C['rule']))
+        a.extend([t(x,192,key,15,C['oxide'],700,'mono'),t(x,256,number(value),59,C['bone'],600,'serif'),
+                  t(x,282,foot,12,C['subtle'],400,'mono')])
+    a.append(t(40,309,'SOURCE / GITHUB API  •  NO PRIVATE REPOSITORY DATA',12,C['subtle'],400,'mono'))
+    return document(h,'Public GitHub statistics for tribul8ion',a)
+
+
+def heat_level(count,maximum):
+    if count<=0:return 0
+    return max(1,min(4,math.ceil(count*4/max(1,maximum))))
 
 
 def heatmap(data):
-    h=366
-    d=parse_days(data)
-    total=data.get('annual_contributions')
-    title='A year, in commits and contributions.'
-    subtitle=(f'{number(total)} visible contributions across GitHub’s contribution calendar.'
-              if total is not None else 'The calendar will populate after the first public-data sync.')
-    a=shell(h,'02','CONTRIBUTION ARCHIVE',title,subtitle,data,
-            'CALENDAR  /  52 WEEKS    •    SHADED BY CONTRIBUTIONS PER DAY')
-    # 53 complete/partial weeks. Sunday-based, just like GitHub.
-    if d:
-        end=max(d)
-        start=end-timedelta(days=370)
-        start-=timedelta(days=(start.weekday()+1)%7)
-        weeks=[start+timedelta(days=7*i) for i in range(53)]
-        maxv=max(d.values())
-        earliest=min(d)
-    else:
-        end=date(2026,11,10)  # Used only to draw an undated neutral skeleton.
-        start=end-timedelta(days=370)
-        start-=timedelta(days=(start.weekday()+1)%7)
-        weeks=[start+timedelta(days=7*i) for i in range(53)]
-        earliest=start
-        maxv=0
-    x0=85; pitch=18.75; cell=14.6; y0=183
-    a.extend([t(36,202,'SUN',12,C['subtle'],400,'mono'),
-              t(36,236,'TUE',12,C['subtle'],400,'mono'),
-              t(36,270,'THU',12,C['subtle'],400,'mono'),
-              t(36,304,'SAT',12,C['subtle'],400,'mono')])
-    previous=None
-    for i,wk in enumerate(weeks):
-        month=(wk.year,wk.month)
-        if month!=previous and i<51:
-            a.append(t(round(x0+i*pitch,1),165,wk.strftime('%b').upper(),13,C['muted'],600,'mono'))
-        previous=month
+    h=360;year=calendar_year(data);days=parse_days(data);total=year_total(data,year)
+    a=chrome(h,'02','CONTRIBUTION ARCHIVE',data)
+    a.extend([t(38,119,'A year of public',37,C['bone'],500,'serif'),
+              t(38,164,'contributions.',37,C['bone'],500,'serif'),
+              t(40,206,'Calendar year / Jan—Dec.',17,C['muted']),
+              t(40,237,'Only visible GitHub activity.',16,C['body']),
+              t(40,307,'YEAR TO DATE',13,C['oxide'],700,'mono'),
+              t(218,319,number(total),35,C['bone'],500,'serif',anchor='end'),
+              path('M329 74V334',C['rule']),star(329,204,8,C['oxide'])])
+    beginning=date(year,1,1)
+    start=beginning-timedelta(days=(beginning.weekday()+1)%7)
+    end=date(year,12,31)
+    nweek=((end-start).days//7)+1
+    x0=389;available=686;pitch=available/nweek;cell=min(10.4,pitch-2.1)
+    y0=143;row_pitch=22
+    maxv=max(days.values()) if days else 0
+    today=date.fromisoformat(str(data['updated_at'])[:10]) if re.match(r'^\d{4}-\d{2}-\d{2}T',str(data.get('updated_at') or '')) else date(year,12,31)
+    # Draw a blank grid for future dates but never imply actual public activity.
+    for week in range(nweek):
+        weekstart=start+timedelta(days=week*7)
         for dow in range(7):
-            day=wk+timedelta(days=dow)
-            if day>end or day<earliest: continue
-            v=(d or {}).get(day,0)
-            intensity=0 if not v else max(1,min(4,math.ceil(4*v/max(1,maxv))))
-            a.append(rect(round(x0+i*pitch,2),round(y0+dow*20,2),cell,14.6,HEAT[intensity]))
-    return document(h,'GitHub contributions heatmap for the rolling year',a)
+            day=weekstart+timedelta(days=dow)
+            if day.year!=year:continue
+            x=round(x0+week*pitch,2);y=y0+dow*row_pitch
+            if day>today:
+                a.append(rect(x,y,cell,cell,C['secondary']))
+            elif days is None:
+                a.append(rect(x,y,cell,cell,C['low']))
+            else:
+                a.append(rect(x,y,cell,cell,HEAT[heat_level(days.get(day,0),maxv)]))
+    for month in range(1,13):
+        first=date(year,month,1)
+        idx=(first-start).days//7
+        a.append(t(round(x0+idx*pitch,1),116,first.strftime('%b').upper(),12,C['body'],600,'mono'))
+    for idx,weekday in [(0,'S'),(2,'T'),(4,'T'),(6,'S')]:
+        a.append(t(361,y0+idx*row_pitch+10,weekday,11,C['subtle'],400,'mono'))
+    a.extend([path('M383 313H1080',C['grid']),t(389,336,f'{year}   /   JAN—DEC   /   DAILY CONTRIBUTIONS',12,C['subtle'],400,'mono')])
+    for i,color in enumerate(HEAT): a.append(rect(974+i*21,323,13,13,color))
+    return document(h,f'{year} public GitHub contribution calendar, January through December',a)
+
+
+def language_rows(data):
+    values=data.get('languages') or []
+    if not isinstance(values,list):return []
+    totals=Counter()
+    for record in values:
+        if not isinstance(record,dict):continue
+        try:
+            name=safe_string(record['name'],25);size=int(record['bytes'])
+            if size>0 and name:totals[name]+=size
+        except (KeyError,ValueError,TypeError):continue
+    denominator=sum(totals.values())
+    if not denominator:return []
+    # 'Just' is a GitHub Linguist label for Justfile task recipes, not a
+    # representative programming-language footprint; tiny entries hide visual noise.
+    excluded={'Just'}
+    ranked=[(n,c,100*c/denominator) for n,c in totals.most_common()
+            if n not in excluded and 100*c/denominator>=.5]
+    return ranked[:5]
 
 
 def languages(data):
-    h=381
-    a=shell(h,'03','CODE FOOTPRINT','Languages in public repositories.',
-            'Language share is calculated from GitHub-reported code bytes, not developer proficiency.',
-            data,'SCOPE  /  PUBLIC NON-FORK OWNED REPOSITORIES  •  UP TO 30 RECENT REPOS')
-    values=data.get('languages') or []
-    good=[]
-    if isinstance(values,list):
-        for v in values:
-            if not isinstance(v,dict): continue
-            try:
-                name=safe_string(v['name'],20)
-                size=int(v['bytes'])
-                if name and size>0:good.append({'name':name,'bytes':size})
-            except (KeyError,ValueError,TypeError): pass
-    total=sum(z['bytes'] for z in good)
-    if total:
-        for i,row in enumerate(good[:5]):
-            y=170+i*39
-            pct=100*row['bytes']/total
-            a.extend([t(36,y,row['name'],18,C['bone'],600),
-                      rect(252,y-9,724,14,C['grid']),
-                      rect(252,y-9,round(724*pct/100,1),14,HEAT[min(i+1,4)]),
-                      t(1082,y,f'{pct:5.1f}%',18,C['body'],600,'mono',anchor='end')])
+    h=368;a=chrome(h,'03','CODE FOOTPRINT',data)
+    a.extend([t(38,117,'Public code.',39,C['bone'],500,'serif'),
+              t(38,161,'By language.',39,C['bone'],500,'serif'),
+              t(39,215,'Languages in public repositories.',17,C['body']),
+              t(39,240,'Not a measure of proficiency.',16,C['muted']),
+              t(39,328,'OWNED   /   PUBLIC',13,C['oxide'],700,'mono'),
+              t(39,349,'NON-FORK REPOS ONLY',12,C['subtle'],400,'mono'),
+              path('M337 76V350',C['rule']),star(337,206,8,C['oxide'])])
+    rows=language_rows(data)
+    if not rows:
+        a.extend([t(385,164,'Awaiting public-language data.',25,C['bone'],500,'serif'),
+                  t(386,201,'The next successful sync will populate this chart.',17,C['muted'])])
+        for i,scale in enumerate([.91,.73,.52,.38]):a.append(rect(540,241+i*22,round(500*scale),8,C['grid']))
     else:
-        a.extend([t(36,171,'No language breakdown yet',23,C['bone'],600),
-                  t(36,199,'Public repositories will be indexed during the first sync.',17,C['muted'])])
-        for i,frac in enumerate((.93,.71,.54,.4)):
-            a.append(rect(252,215+i*30,round(724*frac),10,C['grid']))
-    return document(h,'Language breakdown across public non-fork repositories',a)
+        for i,(name,_,pct) in enumerate(rows):
+            y=121+i*45
+            a.extend([t(382,y,safe_string(name,15),19,C['bone'],600),
+                      rect(534,y-14,440,15,C['grid']),
+                      rect(534,y-14,round(440*pct/100,1),15,HEAT[min(4,i+1)]),
+                      t(1075,y,f'{pct:.1f}%',18,C['body'],600,'mono',anchor='end')])
+    a.append(path('M382 339H1080',C['grid']))
+    a.append(t(382,357,'MINOR FILE TYPES & TASK RECIPES BELOW 0.5% OMITTED',11,C['subtle'],400,'mono'))
+    return document(h,'Languages by code bytes in public non-fork repositories',a)
 
 
 def activity(data):
-    h=355
-    a=shell(h,'04','PUBLIC ACTIVITY','Recent transmissions.',
-            'A limited feed of recent public events — not a complete work history.',data,
-            'FEED  /  GITHUB PUBLIC EVENTS  •  RECENT ENTRIES ONLY')
+    h=337;a=chrome(h,'04','RECENT TRANSMISSIONS',data)
+    a.extend([t(38,118,'Public activity.',36,C['bone'],500,'serif'),
+              t(39,167,'Recent public actions only.',17,C['body']),
+              t(39,194,'The feed is intentionally limited.',16,C['muted']),
+              path('M337 75V318',C['rule']),star(337,186,8,C['oxide'])])
+    events=data.get('events') or []
+    if events:
+        for i,event in enumerate(events[:4]):
+            y=116+i*57
+            a.append(t(383,y,safe_string(event.get('action','EVENT'),28),17,C['bone'],700,'mono'))
+            a.append(t(1080,y,safe_string(event.get('when',''),15),13,C['subtle'],400,'mono',anchor='end'))
+            a.append(t(383,y+23,safe_string(event.get('repo',''),52),17,C['muted']))
+            if i<3:a.append(path(f'M383 {y+38}H1080',C['grid']))
+    else:
+        a.extend([t(382,158,'No public events indexed yet.',24,C['bone'],500,'serif'),
+                  t(382,188,'Data appears after the next successful refresh.',16,C['muted'])])
+    return document(h,'Latest publicly visible GitHub actions',a)
+
+
+def mobile_signal(data):
+    h=354;a=chrome(h,'01','PUBLIC SIGNAL',data,True)
+    a.extend([t(20,91,'GitHub, in public.',28,C['bone'],500,'serif'),
+              t(20,115,'Visible projects and contributions.',13,C['muted']),
+              path('M20 128H400',C['grid'])])
+    vals=[('PUBLIC REPOS',data.get('public_repos')),('MERGED PRS',data.get('merged_prs')),
+          ('CONTRIBUTIONS',data.get('annual_contributions')),('FOLLOWERS',data.get('followers'))]
+    for i,(name,val) in enumerate(vals):
+        x=20+(i%2)*196;y=162+(i//2)*100
+        a.extend([t(x,y,name,12,C['oxide'],700,'mono'),t(x,y+53,number(val),46,C['bone'],500,'serif')])
+    a.extend([path('M208 142V331',C['rule']),path('M20 237H400',C['rule'])])
+    return document(h,'Public GitHub metrics for mobile',a,MW)
+
+
+def mobile_heatmap(data):
+    h=366;y=calendar_year(data);days=parse_days(data);a=chrome(h,'02','CONTRIBUTIONS',data,True)
+    a.extend([t(20,88,'January — December.',26,C['bone'],500,'serif'),
+              t(20,110,f'{y} / public activity by month',13,C['muted']),
+              t(20,143,'CALENDAR YEAR',11,C['oxide'],700,'mono'),
+              t(400,143,number(year_total(data,y))+' VISIBLE',12,C['body'],600,'mono',anchor='end')])
+    # A truthful condensed monthly activity plot is legible at 320px screen sizes.
+    for month in range(1,13):
+        x=20+((month-1)%4)*98;y0=182+((month-1)//4)*57
+        month_days=[v for dt,v in (days or {}).items() if dt.year==calendar_year(data) and dt.month==month]
+        count=sum(month_days)
+        future=date(calendar_year(data),month,1)>date.fromisoformat(str(data.get('updated_at') or f'{calendar_year(data)}-12-31')[:10])
+        largest=max(1,max(sum(v for dt,v in (days or {}).items() if dt.year==calendar_year(data) and dt.month==m) for m in range(1,13)))
+        a.extend([t(x,y0,date(2026,month,1).strftime('%b').upper(),12,C['body'],700,'mono'),
+                  rect(x,y0+10,74,10,C['grid']),
+                  rect(x,y0+10,round(74*count/largest,1),10,HEAT[4 if count else 0]),
+                  t(x,y0+34,str(count) if days is not None and not future else '—',11,C['muted'],400,'mono')])
+    return document(h,'Calendar-year public contributions January to December for mobile',a,MW)
+
+
+def mobile_languages(data):
+    h=380;a=chrome(h,'03','CODE FOOTPRINT',data,True)
+    a.extend([t(20,87,'Code footprint.',28,C['bone'],500,'serif'),
+              t(20,113,'Public owned repositories / code bytes',13,C['muted']),
+              path('M20 131H400',C['grid'])])
+    rows=language_rows(data)
+    if rows:
+        for i,(name,_,pct) in enumerate(rows):
+            y=161+i*42
+            a.extend([t(20,y,safe_string(name,21),17,C['bone'],600),
+                      t(400,y,f'{pct:.1f}%',14,C['body'],600,'mono',anchor='end'),
+                      rect(20,y+9,380,10,C['grid']),
+                      rect(20,y+9,round(380*pct/100,1),10,HEAT[min(4,i+1)])])
+    else:
+        a.extend([t(20,194,'Public language data pending.',21,C['bone'],500,'serif'),
+                  t(20,226,'Rendered after the first live sync.',13,C['muted'])])
+    a.append(t(20,365,'MINOR FILE TYPES OMITTED / NOT A SKILL RANKING',10,C['subtle'],400,'mono'))
+    return document(h,'Mobile language footprint across public projects',a,MW)
+
+
+def mobile_activity(data):
+    h=397;a=chrome(h,'04','PUBLIC ACTIVITY',data,True)
+    a.extend([t(20,90,'Recent transmissions.',27,C['bone'],500,'serif'),
+              t(20,113,'A small window of public GitHub events.',12,C['muted']),
+              path('M20 132H400',C['grid'])])
     events=data.get('events') or []
     if events:
         for i,e in enumerate(events[:4]):
-            y=168+i*42
-            a.append(rect(36,y-13,3,28,C['oxide']))
-            a.append(t(55,y,safe_string(e.get('action','EVENT'),28),18,C['bone'],700,'mono'))
-            a.append(t(473,y,safe_string(e.get('repo',''),43),16,C['muted'],400,'mono'))
-            a.append(t(1080,y,safe_string(e.get('when',''),16),15,C['subtle'],400,'mono',anchor='end'))
-            if i<3:a.append(horizontal(y+16,55,1084,C['grid']))
+            y=164+i*53
+            a.extend([t(20,y,safe_string(e.get('action','EVENT'),23),14,C['bone'],700,'mono'),
+                      t(400,y,safe_string(e.get('when',''),10),10,C['subtle'],400,'mono',anchor='end'),
+                      t(20,y+22,safe_string(e.get('repo',''),37),12,C['muted'])])
+            if i<3:a.append(path(f'M20 {y+33}H400',C['grid']))
     else:
-        a.extend([t(36,180,'No public events indexed yet',23,C['bone'],600),
-                  t(36,211,'A successful sync will replace this placeholder with recent activity.',17,C['muted'])])
-        for i in range(3):a.append(horizontal(239+i*25,36,1084,C['grid']))
-    return document(h,'Latest public events from GitHub',a)
+        a.extend([t(20,181,'Public feed awaiting sync.',20,C['bone'],500,'serif')])
+    return document(h,'Mobile recent public GitHub activity',a,MW)
 
 
 def parse_event(e):
@@ -254,7 +361,7 @@ def parse_event(e):
 
 def api(url, token, payload=None):
     headers={'Accept':'application/vnd.github+json',
-             'User-Agent':'tribul8ion-profile-widgets/4.0',
+             'User-Agent':'tribul8ion-profile-widgets/5.0',
              'X-GitHub-Api-Version':'2022-11-28',
              'Authorization':'Bearer '+token}
     content=json.dumps(payload).encode('utf-8') if payload is not None else None
@@ -315,176 +422,62 @@ def live_data(user,token):
             'events':events}
 
 
-
-# GitHub profile column is narrow on phones. These are purpose-built 420px
-# components, not shrunken desktop canvases. The 22-week mobile graph is
-# explicitly labelled; the public total still refers to the rolling year.
-MW=420
-
-def mobile_shell(h, n, title, subtitle, data):
-    return [rect(0,0,MW,h,C['panel']),rect(.5,.5,MW-1,h-1,'none',C['rule']),
-            rect(20,0,64,3,C['oxide']),
-            t(20,28,f'TRBL8 / {n}',12,C['oxide'],700,'mono'),
-            t(400,28,'PUBLIC SIGNAL',10,C['subtle'],400,'mono',anchor='end'),
-            t(20,63,title,23,C['bone'],700),
-            t(20,87,subtitle,13,C['muted']),
-            path('M20 103H400',C['grid']),
-            path(f'M20 {h-32}H400',C['grid']),
-            t(20,h-12,stamp(data),11,C['subtle'],400,'mono')]
-
-def signal_mobile(data):
-    h=332;a=mobile_shell(h,'01','Public GitHub signal','Visible activity only. No private metadata.',data)
-    v=[('PUBLIC REPOS',data.get('public_repos')),('MERGED PRS',data.get('merged_prs')),
-       ('CONTRIBUTIONS',data.get('annual_contributions')),('FOLLOWERS',data.get('followers'))]
-    for i,(name,value) in enumerate(v):
-        col=i%2;row=i//2;x=20+199*col;y=137+row*91
-        a.append(t(x,y,name,13,C['oxide'],700,'mono'))
-        a.append(t(x,y+51,number(value),42,C['bone'],700))
-        if col==0:a.append(path(f'M207 {y-22}V{y+58}',C['grid']))
-    return document(h,'Public GitHub profile statistics on mobile',a,MW)
-
-def heatmap_mobile(data):
-    h=318;d=parse_days(data)
-    a=mobile_shell(h,'02','Contribution archive',
-                   'Recent 22 weeks / daily activity',data)
-    if d:
-        end=max(d);maxv=max(d.values());earliest=min(d)
-    else:
-        end=date(2026,11,10);maxv=0;earliest=end-timedelta(days=154)
-    start=end-timedelta(days=153)
-    start-=timedelta(days=(start.weekday()+1)%7)
-    x0=67; y0=132;pitch=15;cell=11.6
-    for wi in range(22):
-        wk=start+timedelta(days=7*wi)
-        for dow in range(7):
-            day=wk+timedelta(days=dow)
-            if day>end or day<earliest:continue
-            value=(d or {}).get(day,0)
-            level=0 if not value else max(1,min(4,math.ceil(4*value/max(1,maxv))))
-            a.append(rect(x0+wi*pitch,y0+dow*16,cell,cell,HEAT[level]))
-    for dow,label in ((0,'SU'),(2,'TU'),(4,'TH'),(6,'SA')):
-        a.append(t(20,y0+dow*16+11,label,10,C['subtle'],400,'mono'))
-    a.append(t(20,263,f'{number(data.get("annual_contributions"))} VISIBLE / ROLLING YEAR',12,C['body'],600,'mono'))
-    return document(h,'Last 22 weeks of GitHub contributions, mobile chart',a,MW)
-
-def languages_mobile(data):
-    h=366;a=mobile_shell(h,'03','Code footprint','Public non-fork repositories / bytes',data)
-    values=data.get('languages') or []
-    filtered=[]
-    for x in values if isinstance(values,list) else []:
-        if not isinstance(x,dict):continue
-        try:
-            if int(x['bytes'])>0:filtered.append((safe_string(x['name'],17),int(x['bytes'])))
-        except (TypeError,ValueError,KeyError):pass
-    total=sum(size for _,size in filtered)
-    if total:
-        for i,(name,size) in enumerate(filtered[:5]):
-            y=136+i*40
-            pct=100*size/total
-            a.extend([t(20,y,name,15,C['bone'],600),
-                      t(400,y,f'{pct:.1f}%',14,C['body'],600,'mono',anchor='end'),
-                      rect(20,y+9,380,9,C['grid']),rect(20,y+9,round(380*pct/100,1),9,HEAT[min(i+1,4)])])
-    else:
-        a.extend([t(20,153,'Data sync pending',19,C['bone'],600),
-                  t(20,181,'Languages will appear after a successful refresh.',12,C['muted'])])
-        for i in range(4):a.append(rect(20,207+i*29,340-i*59,8,C['grid']))
-    return document(h,'Language breakdown in public projects on mobile',a,MW)
-
-def activity_mobile(data):
-    h=408;a=mobile_shell(h,'04','Recent transmissions','Public events / limited recent window',data)
-    entries=data.get('events') or []
-    if entries:
-        for i,e in enumerate(entries[:4]):
-            y=141+i*62
-            a.extend([rect(20,y-15,3,46,C['oxide']),
-                      t(33,y,safe_string(e.get('action','EVENT'),22),15,C['bone'],700,'mono'),
-                      t(399,y,safe_string(e.get('when',''),10),11,C['subtle'],400,'mono',anchor='end'),
-                      t(33,y+24,safe_string(e.get('repo',''),34),13,C['muted'],400,'mono')])
-            if i<3:a.append(path(f'M33 {y+36}H400',C['grid']))
-    else:
-        a.extend([t(20,158,'No public events indexed yet.',19,C['bone'],600),
-                  t(20,184,'The next refresh will fill this panel.',13,C['muted'])])
-        for i in range(3):a.append(path(f'M20 {229+i*38}H400',C['grid']))
-    return document(h,'Recent public activity for mobile',a,MW)
-
 def render(data):
-    cards={'signal.svg':signal(data),'heatmap.svg':heatmap(data),
-           'languages.svg':languages(data),'activity.svg':activity(data),
-           'mobile/signal.svg':signal_mobile(data),'mobile/heatmap.svg':heatmap_mobile(data),
-           'mobile/languages.svg':languages_mobile(data),'mobile/activity.svg':activity_mobile(data)}
+    cards={
+      'signal.svg':signal(data),'heatmap.svg':heatmap(data),'languages.svg':languages(data),'activity.svg':activity(data),
+      'mobile/signal.svg':mobile_signal(data),'mobile/heatmap.svg':mobile_heatmap(data),
+      'mobile/languages.svg':mobile_languages(data),'mobile/activity.svg':mobile_activity(data)}
     for name,content in cards.items():
         root=ElementTree.fromstring(content)
-        if root.tag != '{http://www.w3.org/2000/svg}svg':raise ValueError(name)
-        if any(w in content.lower() for w in ('<script','<foreignobject','javascript:','http://','https://')):
-            # xmlns is the one permitted URL; tested separately below.
-            scrub=content.replace('http://www.w3.org/2000/svg','')
-            if any(w in scrub.lower() for w in ('<script','<foreignobject','javascript:','http://','https://')):
-                raise ValueError('Unsafe SVG content')
+        assert root.tag=='{http://www.w3.org/2000/svg}svg', name
+        scrub=content.replace('http://www.w3.org/2000/svg','').lower()
+        if any(term in scrub for term in ('<script','<foreignobject','javascript:','http://','https://','data:')):
+            raise ValueError('Unsafe SVG content in '+name)
     return cards
 
-
-
-# Content-addressed cache keys for GitHub's proxied README images.
-# The version is the Git blob SHA-1 prefix; it changes only if SVG bytes change.
-# All eight refs must be present, so a broken README integration fails loudly.
-_WIDGET_REF = re.compile(
-    r'(\./assets/widgets/(?:mobile/)?(?:signal|heatmap|languages|activity)\.svg)'
-    r'(?:\?v=[a-f0-9]{12})?'
-)
+# Git blob SHA-1 serves as deterministic cache-busting revision for raw SVG images.
+_WIDGET_REF = re.compile(r'(\./assets/widgets/(?:mobile/)?(?:signal|heatmap|languages|activity)\.svg)(?:\?v=[a-f0-9]{12})?')
 
 
 def widget_revision(svg):
-    raw = svg.encode('utf-8')
-    header = b'blob ' + str(len(raw)).encode('ascii') + b'\x00'
-    return hashlib.sha1(header + raw).hexdigest()[:12]
+    raw=svg.encode('utf-8')
+    return hashlib.sha1(b'blob '+str(len(raw)).encode('ascii')+b'\x00'+raw).hexdigest()[:12]
 
 
-def versioned_readme(source, cards):
-    found = set()
-
+def versioned_readme(source,cards):
+    found=set()
     def rewrite(match):
-        path = match.group(1)
-        name = path.removeprefix('./assets/widgets/')
+        name=match.group(1).removeprefix('./assets/widgets/')
         found.add(name)
-        return path + '?v=' + widget_revision(cards[name])
-
-    result = _WIDGET_REF.sub(rewrite, source)
+        return match.group(1)+'?v='+widget_revision(cards[name])
+    result=_WIDGET_REF.sub(rewrite,source)
     if found != set(cards):
-        raise ValueError('README widget references do not match rendered SVGs: '
-                         + repr(sorted(set(cards) ^ found)))
+        raise ValueError('README telemetry references mismatch generated SVG assets: '+repr(sorted(set(cards)^found)))
     return result
 
 
 def main():
-    parser=argparse.ArgumentParser(description='Render public GitHub profile SVG widgets')
-    parser.add_argument('--fixture',type=Path,help='Offline demo data, NEVER for production sync')
+    parser=argparse.ArgumentParser(description='Render TRBL8 public GitHub SVG widgets')
+    parser.add_argument('--fixture',type=Path,help='Offline demo data only; never publish as live metrics')
     parser.add_argument('--out',type=Path,default=OUT)
     parser.add_argument('--user',default=USER)
-    arg=parser.parse_args()
-    data=json.loads(arg.fixture.read_text('utf-8')) if arg.fixture else live_data(arg.user,os.getenv('GITHUB_TOKEN',''))
-    items=render(data)
-    # Only the real production refresh versions the tracked README. Offline
-    # fixture tests and --out previews never change profile metadata.
-    readme_path=ROOT/'README.md'
-    previous_readme=None
-    next_readme=None
-    if not arg.fixture and arg.out.resolve()==OUT.resolve():
-        previous_readme=readme_path.read_text(encoding='utf-8')
-        next_readme=versioned_readme(previous_readme,items)
-    arg.out.mkdir(parents=True,exist_ok=True)
-    for name,content in items.items():
-        temp=arg.out/(name+'.tmp')
-        temp.parent.mkdir(parents=True,exist_ok=True)
-        temp.write_text(content,encoding='utf-8')
-        temp.replace(arg.out/name)
-    if next_readme is not None and next_readme!=previous_readme:
-        temp=readme_path.with_name('README.md.tmp')
-        temp.write_text(next_readme,encoding='utf-8')
-        temp.replace(readme_path)
-    print(f'OK: refreshed {len(items)} SVG cards; README cache keys updated if changed')
+    args=parser.parse_args()
+    data=json.loads(args.fixture.read_text('utf-8')) if args.fixture else live_data(args.user,os.getenv('GITHUB_TOKEN',''))
+    cards=render(data)
+    out=args.out
+    updated_readme=None
+    readme=ROOT/'README.md'
+    if args.fixture is None and out.resolve()==OUT.resolve():
+        updated_readme=versioned_readme(readme.read_text('utf-8'),cards)
+    out.mkdir(parents=True,exist_ok=True)
+    for name,svg in cards.items():
+        target=out/name;target.parent.mkdir(parents=True,exist_ok=True)
+        temp=target.with_suffix('.svg.tmp');temp.write_text(svg,encoding='utf-8');temp.replace(target)
+    if updated_readme is not None and updated_readme!=readme.read_text('utf-8'):
+        temp=readme.with_name('README.md.tmp');temp.write_text(updated_readme,encoding='utf-8');temp.replace(readme)
+    print(f'OK: refreshed {len(cards)} TRBL8 SVG panels')
 
 if __name__=='__main__':
     try:main()
     except Exception as exc:
-        print(f'FAIL: no cards replaced: {exc}',file=sys.stderr)
-        raise SystemExit(1)
+        print('FAIL: '+str(exc),file=sys.stderr);raise SystemExit(1)
