@@ -13,6 +13,14 @@ import render_widgets as R
 import render_static as S
 
 class BlackDeathTests(unittest.TestCase):
+    def test_engraved_frame_is_used_by_all_panels(self):
+        sources={**S.render(),**R.render({})}
+        self.assertEqual(len(sources),18)
+        for name,svg in sources.items():
+            ET.fromstring(svg)
+            self.assertEqual(svg.count('<g transform='),4,name)
+            self.assertIn('stroke="#BC9494"',svg,name)
+
     def test_calendar_is_january_to_december_and_not_rolling_november_first(self):
         card=R.heatmap({'updated_at':'2026-11-10T10:00','contribution_days':[
             {'date':'2026-01-01','count':1},{'date':'2026-11-10','count':3}
