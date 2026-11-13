@@ -38,32 +38,32 @@
 <!-- 02 / PUBLIC SIGNAL; eight paired SVGs versioned automatically by the renderer. -->
 <p align="center">
   <picture>
-    <source media="(max-width: 800px)" srcset="./assets/widgets/mobile/signal.svg?v=cd39c22f5914" />
-    <img src="./assets/widgets/signal.svg?v=41613ca09eea" width="100%" alt="Public GitHub statistics: public repositories, merged pull requests, visible contributions in the past year and followers." />
+    <source media="(max-width: 800px)" srcset="./assets/widgets/mobile/signal.svg?v=55a3ba0f0db2" />
+    <img src="./assets/widgets/signal.svg?v=f7d08421b5aa" width="100%" alt="Public GitHub statistics: public repositories, merged pull requests, visible contributions in the past year and followers." />
   </picture>
 </p>
 
 <!-- 03 / CONTRIBUTION CALENDAR -->
 <p align="center">
   <picture>
-    <source media="(max-width: 800px)" srcset="./assets/widgets/mobile/heatmap.svg?v=e7de79026a0a" />
-    <img src="./assets/widgets/heatmap.svg?v=0cda5557c765" width="100%" alt="Public contributions during the calendar year, January to December; recent activity is highlighted in warm red." />
+    <source media="(max-width: 800px)" srcset="./assets/widgets/mobile/heatmap.svg?v=c305c86e68d2" />
+    <img src="./assets/widgets/heatmap.svg?v=e639faa966a8" width="100%" alt="Public contributions during the calendar year, January to December; recent activity is highlighted in warm red." />
   </picture>
 </p>
 
 <!-- 04 / CODE FOOTPRINT -->
 <p align="center">
   <picture>
-    <source media="(max-width: 800px)" srcset="./assets/widgets/mobile/languages.svg?v=b5d4d7c9f495" />
-    <img src="./assets/widgets/languages.svg?v=70da59c5889b" width="100%" alt="Languages by GitHub-reported code bytes in public non-fork repositories; tiny file types are not shown." />
+    <source media="(max-width: 800px)" srcset="./assets/widgets/mobile/languages.svg?v=0b28645d34c1" />
+    <img src="./assets/widgets/languages.svg?v=7908bbd05d1e" width="100%" alt="Languages by GitHub-reported code bytes in public non-fork repositories; tiny file types are not shown." />
   </picture>
 </p>
 
 <!-- 05 / PUBLIC ACTIVITY -->
 <p align="center">
   <picture>
-    <source media="(max-width: 800px)" srcset="./assets/widgets/mobile/activity.svg?v=f06769383c5a" />
-    <img src="./assets/widgets/activity.svg?v=3791f77786e0" width="100%" alt="A small feed of recent public GitHub events and contributions." />
+    <source media="(max-width: 800px)" srcset="./assets/widgets/mobile/activity.svg?v=904e6b46d9e6" />
+    <img src="./assets/widgets/activity.svg?v=16e121de6131" width="100%" alt="A small feed of recent public GitHub events and contributions." />
   </picture>
 </p>
 
